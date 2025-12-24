@@ -104,7 +104,7 @@ export default async function DashboardPage() {
         {/* Lab Access */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold mb-4">Laboratory Access</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               href="/labs/lab1"
               className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
@@ -118,6 +118,27 @@ export default async function DashboardPage() {
             >
               <h4 className="font-semibold text-gray-900 mb-1">Lab 2</h4>
               <p className="text-sm text-gray-600">Mixed Equipment Lab</p>
+            </Link>
+            <Link
+              href="/labs/lab3"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+            >
+              <h4 className="font-semibold text-gray-900 mb-1">Lab 3</h4>
+              <p className="text-sm text-gray-600">Biology & Chemistry</p>
+            </Link>
+            <Link
+              href="/labs/lab4"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+            >
+              <h4 className="font-semibold text-gray-900 mb-1">Lab 4</h4>
+              <p className="text-sm text-gray-600">Physics & Electronics</p>
+            </Link>
+            <Link
+              href="/labs/lab5"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+            >
+              <h4 className="font-semibold text-gray-900 mb-1">Lab 5</h4>
+              <p className="text-sm text-gray-600">Computer & Networking</p>
             </Link>
           </div>
         </div>

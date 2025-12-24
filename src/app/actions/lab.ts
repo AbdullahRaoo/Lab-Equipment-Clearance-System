@@ -8,7 +8,7 @@ import type { Equipment, Issue, Return } from '@/types/lab';
 // INVENTORY ACTIONS
 // =====================================================
 
-export async function getLabInventory(labSchema: 'lab1' | 'lab2') {
+export async function getLabInventory(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -24,7 +24,7 @@ export async function getLabInventory(labSchema: 'lab1' | 'lab2') {
   return { data: data as Equipment[] };
 }
 
-export async function getAvailableEquipment(labSchema: 'lab1' | 'lab2') {
+export async function getAvailableEquipment(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -40,7 +40,7 @@ export async function getAvailableEquipment(labSchema: 'lab1' | 'lab2') {
   return { data: data as Equipment[] };
 }
 
-export async function getEquipmentById(labSchema: 'lab1' | 'lab2', equipmentId: string) {
+export async function getEquipmentById(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5', equipmentId: string) {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -57,7 +57,7 @@ export async function getEquipmentById(labSchema: 'lab1' | 'lab2', equipmentId: 
 }
 
 export async function borrowEquipment(
-  labSchema: 'lab1' | 'lab2',
+  labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5',
   equipmentId: string,
   expectedReturnDate: string
 ) {
@@ -124,7 +124,7 @@ export async function borrowEquipment(
 }
 
 export async function returnEquipment(
-  labSchema: 'lab1' | 'lab2',
+  labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5',
   returnId: string,
   conditionOnReturn: string,
   returnNotes?: string
@@ -222,7 +222,7 @@ export async function returnEquipment(
 // =====================================================
 
 export async function createIssue(
-  labSchema: 'lab1' | 'lab2',
+  labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5',
   equipmentId: string,
   issueType: string,
   severity: string,
@@ -277,7 +277,7 @@ export async function createIssue(
   return { data: data as Issue };
 }
 
-export async function getLabIssues(labSchema: 'lab1' | 'lab2') {
+export async function getLabIssues(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -293,7 +293,7 @@ export async function getLabIssues(labSchema: 'lab1' | 'lab2') {
 }
 
 export async function resolveIssue(
-  labSchema: 'lab1' | 'lab2',
+  labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5',
   issueId: string,
   resolution: string,
   damageCost?: number,
@@ -349,7 +349,7 @@ export async function resolveIssue(
 // RETURNS ACTIONS
 // =====================================================
 
-export async function getUserReturns(labSchema: 'lab1' | 'lab2') {
+export async function getUserReturns(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
   const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -380,7 +380,7 @@ export async function getUserReturns(labSchema: 'lab1' | 'lab2') {
   return { data: data as Return[] };
 }
 
-export async function getLabReturns(labSchema: 'lab1' | 'lab2') {
+export async function getLabReturns(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
   const { data, error } = await supabase

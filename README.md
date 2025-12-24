@@ -45,6 +45,8 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 Run the SQL scripts in the `database/` folder in order:
    - `01_central_schema.sql` - Creates central schema and tables
    - `02_rls_policies.sql` - Sets up Row Level Security policies
+   - `03_lab1_lab2_schemas.sql` - Creates Lab 1 & 2 schemas and tables
+   - `04_lab1_lab2_business_logic.sql` - Adds triggers and stored procedures
 
 4. Run the development server:
 ```bash
@@ -58,23 +60,28 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
 src/
 ├── app/
-│   ├── actions/         # Server actions (auth, etc.)
+│   ├── actions/         # Server actions (auth, lab operations)
 │   ├── login/          # Login page
 │   ├── signup/         # Signup page
 │   ├── dashboard/      # Main dashboard
+│   ├── labs/
+│   │   ├── lab1/       # Lab 1 pages
+│   │   └── lab2/       # Lab 2 pages
 │   └── page.tsx        # Landing page
 ├── lib/
 │   └── supabase/       # Supabase client configurations
 └── types/              # TypeScript type definitions
 
 database/
-├── 01_central_schema.sql    # Central database schema
-└── 02_rls_policies.sql      # Row Level Security policies
+├── 01_central_schema.sql              # Central database schema
+├── 02_rls_policies.sql                # Row Level Security policies
+├── 03_lab1_lab2_schemas.sql           # Lab 1 & 2 schemas
+└── 04_lab1_lab2_business_logic.sql    # Triggers and stored procedures
 ```
 
-## Features (Stage 1 - M1 Complete)
+## Features (Stage 1 & 2 - M1 & M2 Complete)
 
-### ✅ Completed
+### ✅ Stage 1 - M1 (Abdullah) - Completed
 - Next.js project setup with TypeScript
 - Supabase integration (client, server, middleware)
 - Central database schema with users and audit logs tables
@@ -82,6 +89,20 @@ database/
 - Authentication system (sign-up, login, logout)
 - Landing page, login page, signup page
 - Protected dashboard with user profile
+
+### ✅ Stage 1 & 2 - M2 (Waleed) - Completed
+- Lab 1 and Lab 2 database schemas
+- Inventory tables with JSONB metadata support
+- Issues and returns tables for both labs
+- Performance indexes (including GIN indexes for JSONB)
+- Inventory status triggers (auto-update on borrow/return)
+- Issue registration stored procedures
+- Return workflow with late detection and penalty calculation
+- Equipment availability check functions
+- JSONB search functions for flexible equipment queries
+- User borrowed equipment tracking
+- Server actions for all lab operations
+- Lab 1 and Lab 2 dashboard pages
 
 ### User Roles
 - **Admin**: Full system access
@@ -92,7 +113,7 @@ database/
 ## Development Team
 
 - **M1 (Abdullah)**: Central DB & Auth ✅
-- **M2**: Labs 1-2 & Inventory Logic
+- **M2 (Waleed)**: Labs 1-2 & Inventory Logic ✅
 - **M3**: Labs 3-5 & Request Logic
 - **M4**: Inter-lab System & Clearance Reports
 
@@ -113,9 +134,10 @@ Make sure to replace the placeholder values in `.env.local` with your actual Sup
 
 ## Next Steps
 
-- **Stage 1 - M2**: Lab 1-2 schemas and inventory structure
 - **Stage 1 - M3**: Lab 3-5 schemas and inventory structure
 - **Stage 1 - M4**: Cross-schema query architecture
+- **Stage 2 - M3**: Lab 3-5 business logic and clearance request workflow
+- **Stage 2 - M4**: Multi-schema clearance check and reporting
 
 
 ## Deploy on Vercel

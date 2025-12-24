@@ -67,16 +67,55 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* Lab Access */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h3 className="text-lg font-semibold mb-4">Laboratory Access</h3>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <Link
+              href="/labs/lab1"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-center"
+            >
+              <div className="text-2xl mb-2">🔬</div>
+              <p className="font-medium">Lab 1</p>
+            </Link>
+            <Link
+              href="/labs/lab2"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-center"
+            >
+              <div className="text-2xl mb-2">⚗️</div>
+              <p className="font-medium">Lab 2</p>
+            </Link>
+            <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center opacity-50">
+              <div className="text-2xl mb-2">🧪</div>
+              <p className="font-medium">Lab 3</p>
+              <p className="text-xs text-gray-500">Coming Soon</p>
+            </div>
+            <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center opacity-50">
+              <div className="text-2xl mb-2">🔧</div>
+              <p className="font-medium">Lab 4</p>
+              <p className="text-xs text-gray-500">Coming Soon</p>
+            </div>
+            <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center opacity-50">
+              <div className="text-2xl mb-2">💻</div>
+              <p className="font-medium">Lab 5</p>
+              <p className="text-xs text-gray-500">Coming Soon</p>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold mb-2">My Equipment</h3>
             <p className="text-gray-600 text-sm mb-4">
-              View equipment you've borrowed
+              View equipment you've borrowed across all labs
             </p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <Link
+              href="/labs/lab1"
+              className="block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center"
+            >
               View Equipment
-            </button>
+            </Link>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">

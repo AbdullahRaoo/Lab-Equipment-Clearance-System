@@ -75,9 +75,12 @@ export default async function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               View equipment you've borrowed
             </p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <Link 
+              href="/clearance"
+              className="block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center"
+            >
               View Equipment
-            </button>
+            </Link>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
@@ -85,9 +88,12 @@ export default async function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Check your clearance status
             </p>
-            <button className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            <Link 
+              href="/clearance"
+              className="block w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-center"
+            >
               Check Status
-            </button>
+            </Link>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
@@ -95,9 +101,12 @@ export default async function DashboardPage() {
             <p className="text-gray-600 text-sm mb-4">
               Request clearance certificate
             </p>
-            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+            <Link 
+              href="/clearance"
+              className="block w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-center"
+            >
               New Request
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -161,9 +170,12 @@ export default async function DashboardPage() {
               <button className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50">
                 Manage Inventory
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50">
-                Review Requests
-              </button>
+              <Link 
+                href="/admin/clearance"
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 text-center"
+              >
+                Review Clearance Requests
+              </Link>
             </div>
           </div>
         )}

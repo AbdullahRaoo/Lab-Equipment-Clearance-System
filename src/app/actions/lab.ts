@@ -2,388 +2,395 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { LabSchema } from '@/types/lab';
+import type { Equipment, Issue, Return } from '@/types/lab';
 
 // =====================================================
 // INVENTORY ACTIONS
 // =====================================================
 
-export async function getLabInventory(lab: LabSchema) {
+export async function getLabInventory(labSchema: 'lab1' | 'lab2') {
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .from(`${lab}.inventory`)
+    .from(`${labSchema}.inventory`)
     .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(`Error fetching ${labSchema} inventory:`, error);
+    return { error: error.message };
+  }
+
+  return { data: data as Equipment[] };
+}
+
+export async function getAvailableEquipment(labSchema: 'lab1' | 'lab2') {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from(`${labSchema}.inventory`)
+    .select('*')
+    .eq('status', 'available')
     .order('equipment_name');
-  
+
   if (error) {
-    console.error('Error fetching inventory:', error);
     return { error: error.message };
   }
-  
-  return { data };
+
+  return { data: data as Equipment[] };
 }
 
-export async function searchEquipment(
-  lab: LabSchema,
-  searchTerm?: string,
-  category?: string,
-  status?: string,
-  metadataFilter?: Record<string, any>
-) {
+export async function getEquipmentById(labSchema: 'lab1' | 'lab2', equipmentId: string) {
   const supabase = await createClient();
   
-  const { data, error } = await supabase.rpc(`${lab}.search_equipment`, {
-    p_search_term: searchTerm || null,
-    p_category: category || null,
-    p_status: status || null,
-    p_metadata_filter: metadataFilter ? JSON.stringify(metadataFilter) : null,
-  });
-  
-  if (error) {
-    console.error('Error searching equipment:', error);
-    return { error: error.message };
-  }
-  
-  return { data };
-}
+  const { data, error } = await supabase
+    .from(`${labSchema}.inventory`)
+    .select('*')
+    .eq('id', equipmentId)
+    .single();
 
-export async function getAvailableEquipment(lab: LabSchema) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase.rpc(`${lab}.get_available_equipment`);
-  
   if (error) {
-    console.error('Error fetching available equipment:', error);
     return { error: error.message };
   }
-  
-  return { data };
-}
 
-export async function checkEquipmentAvailability(lab: LabSchema, equipmentId: string) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase.rpc(`${lab}.check_equipment_availability`, {
-    p_equipment_id: equipmentId,
-  });
-  
-  if (error) {
-    console.error('Error checking availability:', error);
-    return { error: error.message };
-  }
-  
-  return { data: data?.[0] };
+  return { data: data as Equipment };
 }
 
 export async function borrowEquipment(
-  lab: LabSchema,
+  labSchema: 'lab1' | 'lab2',
   equipmentId: string,
-  userId: string,
   expectedReturnDate: string
 ) {
   const supabase = await createClient();
   
-  // Check if equipment is available
-  const availCheck = await checkEquipmentAvailability(lab, equipmentId);
-  if (availCheck.error || !availCheck.data?.is_available) {
-    return { error: 'Equipment is not available' };
+  // Get current user
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
+    return { error: 'Not authenticated' };
   }
-  
-  const { error } = await supabase
-    .from(`${lab}.inventory`)
+
+  const { data: currentUser } = await supabase
+    .from('central.users')
+    .select('id')
+    .eq('auth_id', authUser.id)
+    .single();
+
+  if (!currentUser) {
+    return { error: 'User not found' };
+  }
+
+  // Update equipment status
+  const { error: updateError } = await supabase
+    .from(`${labSchema}.inventory`)
     .update({
-      borrowed_by: userId,
+      status: 'borrowed',
+      current_borrower_id: currentUser.id,
+      borrowed_at: new Date().toISOString(),
       expected_return_date: expectedReturnDate,
     })
-    .eq('id', equipmentId);
-  
-  if (error) {
-    console.error('Error borrowing equipment:', error);
-    return { error: error.message };
+    .eq('id', equipmentId)
+    .eq('status', 'available');
+
+  if (updateError) {
+    return { error: updateError.message };
   }
-  
-  revalidatePath(`/labs/${lab}`);
+
+  // Create return record
+  const { error: returnError } = await supabase
+    .from(`${labSchema}.returns`)
+    .insert({
+      equipment_id: equipmentId,
+      borrower_id: currentUser.id,
+      borrowed_date: new Date().toISOString(),
+      expected_return_date: expectedReturnDate,
+      status: 'pending',
+    });
+
+  if (returnError) {
+    return { error: returnError.message };
+  }
+
+  // Log the action
+  await supabase.rpc('central.log_action', {
+    p_action: 'borrow_equipment',
+    p_entity_type: 'equipment',
+    p_entity_id: equipmentId,
+    p_schema_name: labSchema,
+    p_details: { expected_return_date: expectedReturnDate },
+  });
+
+  revalidatePath(`/labs/${labSchema}`);
   return { success: true };
 }
 
-export async function getUserBorrowedEquipment(lab: LabSchema, userId: string) {
+export async function returnEquipment(
+  labSchema: 'lab1' | 'lab2',
+  returnId: string,
+  conditionOnReturn: string,
+  returnNotes?: string
+) {
   const supabase = await createClient();
   
-  const { data, error } = await supabase.rpc(`${lab}.get_user_borrowed_equipment`, {
-    p_user_id: userId,
-  });
-  
-  if (error) {
-    console.error('Error fetching borrowed equipment:', error);
-    return { error: error.message };
+  // Get current user
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
+    return { error: 'Not authenticated' };
   }
-  
-  return { data };
+
+  const { data: currentUser } = await supabase
+    .from('central.users')
+    .select('id')
+    .eq('auth_id', authUser.id)
+    .single();
+
+  if (!currentUser) {
+    return { error: 'User not found' };
+  }
+
+  // Get return record
+  const { data: returnRecord, error: fetchError } = await supabase
+    .from(`${labSchema}.returns`)
+    .select('*, equipment_id')
+    .eq('id', returnId)
+    .single();
+
+  if (fetchError) {
+    return { error: fetchError.message };
+  }
+
+  const actualReturnDate = new Date();
+  const expectedDate = new Date(returnRecord.expected_return_date);
+  const isLate = actualReturnDate > expectedDate;
+  const daysOverdue = isLate 
+    ? Math.floor((actualReturnDate.getTime() - expectedDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  // Update return record
+  const { error: updateReturnError } = await supabase
+    .from(`${labSchema}.returns`)
+    .update({
+      actual_return_date: actualReturnDate.toISOString(),
+      status: 'returned',
+      condition_on_return: conditionOnReturn,
+      return_notes: returnNotes,
+      inspected_by: currentUser.id,
+      is_late: isLate,
+      days_overdue: daysOverdue,
+      late_fee: daysOverdue * 10, // $10 per day late fee
+    })
+    .eq('id', returnId);
+
+  if (updateReturnError) {
+    return { error: updateReturnError.message };
+  }
+
+  // Update equipment status
+  const { error: updateEquipmentError } = await supabase
+    .from(`${labSchema}.inventory`)
+    .update({
+      status: 'available',
+      current_borrower_id: null,
+      borrowed_at: null,
+      expected_return_date: null,
+      condition: conditionOnReturn,
+    })
+    .eq('id', returnRecord.equipment_id);
+
+  if (updateEquipmentError) {
+    return { error: updateEquipmentError.message };
+  }
+
+  // Log the action
+  await supabase.rpc('central.log_action', {
+    p_action: 'return_equipment',
+    p_entity_type: 'equipment',
+    p_entity_id: returnRecord.equipment_id,
+    p_schema_name: labSchema,
+    p_details: { 
+      condition: conditionOnReturn,
+      is_late: isLate,
+      days_overdue: daysOverdue 
+    },
+  });
+
+  revalidatePath(`/labs/${labSchema}`);
+  return { success: true };
 }
 
 // =====================================================
 // ISSUE ACTIONS
 // =====================================================
 
-export async function registerIssue(
-  lab: LabSchema,
+export async function createIssue(
+  labSchema: 'lab1' | 'lab2',
   equipmentId: string,
-  reportedBy: string,
   issueType: string,
   severity: string,
   title: string,
-  description: string,
-  attachments?: any[]
+  description: string
 ) {
   const supabase = await createClient();
   
-  const { data, error } = await supabase.rpc(`${lab}.register_issue`, {
-    p_equipment_id: equipmentId,
-    p_reported_by: reportedBy,
-    p_issue_type: issueType,
-    p_severity: severity,
-    p_title: title,
-    p_description: description,
-    p_attachments: attachments ? JSON.stringify(attachments) : '[]',
-  });
-  
-  if (error) {
-    console.error('Error registering issue:', error);
-    return { error: error.message };
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
+    return { error: 'Not authenticated' };
   }
-  
-  revalidatePath(`/labs/${lab}/issues`);
-  return { data };
-}
 
-export async function getLabIssues(lab: LabSchema, status?: string) {
-  const supabase = await createClient();
-  
-  let query = supabase
-    .from(`${lab}.issues`)
-    .select('*, equipment:equipment_id(*), reporter:reported_by(*)')
-    .order('created_at', { ascending: false });
-  
-  if (status) {
-    query = query.eq('status', status);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error fetching issues:', error);
-    return { error: error.message };
-  }
-  
-  return { data };
-}
+  const { data: currentUser } = await supabase
+    .from('central.users')
+    .select('id')
+    .eq('auth_id', authUser.id)
+    .single();
 
-export async function updateIssueStatus(
-  lab: LabSchema,
-  issueId: string,
-  status: string,
-  resolutionNotes?: string
-) {
-  const supabase = await createClient();
-  
-  const updateData: any = { status };
-  
-  if (status === 'resolved' || status === 'closed') {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    
-    updateData.resolved_by = user?.id;
-    updateData.resolved_at = new Date().toISOString();
-    if (resolutionNotes) {
-      updateData.resolution_notes = resolutionNotes;
-    }
+  if (!currentUser) {
+    return { error: 'User not found' };
   }
-  
-  const { error } = await supabase
-    .from(`${lab}.issues`)
-    .update(updateData)
-    .eq('id', issueId);
-  
-  if (error) {
-    console.error('Error updating issue:', error);
-    return { error: error.message };
-  }
-  
-  revalidatePath(`/labs/${lab}/issues`);
-  return { success: true };
-}
 
-// =====================================================
-// RETURN ACTIONS
-// =====================================================
-
-export async function processReturn(
-  lab: LabSchema,
-  equipmentId: string,
-  userId: string,
-  conditionOnReturn: string,
-  conditionNotes?: string
-) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase.rpc(`${lab}.process_return`, {
-    p_equipment_id: equipmentId,
-    p_user_id: userId,
-    p_condition_on_return: conditionOnReturn,
-    p_condition_notes: conditionNotes || null,
-  });
-  
-  if (error) {
-    console.error('Error processing return:', error);
-    return { error: error.message };
-  }
-  
-  revalidatePath(`/labs/${lab}`);
-  revalidatePath(`/labs/${lab}/returns`);
-  return { data };
-}
-
-export async function getLabReturns(lab: LabSchema, userId?: string) {
-  const supabase = await createClient();
-  
-  let query = supabase
-    .from(`${lab}.returns`)
-    .select('*, equipment:equipment_id(*), user:user_id(*)')
-    .order('returned_at', { ascending: false });
-  
-  if (userId) {
-    query = query.eq('user_id', userId);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error fetching returns:', error);
-    return { error: error.message };
-  }
-  
-  return { data };
-}
-
-export async function verifyReturn(
-  lab: LabSchema,
-  returnId: string,
-  verifierId: string,
-  status: string,
-  verificationNotes?: string,
-  penaltyAmount?: number,
-  penaltyReason?: string
-) {
-  const supabase = await createClient();
-  
-  const updateData: any = {
-    status,
-    verified_by: verifierId,
-    verified_at: new Date().toISOString(),
-    verification_notes: verificationNotes || null,
-  };
-  
-  if (penaltyAmount && penaltyAmount > 0) {
-    updateData.penalty_applied = true;
-    updateData.penalty_amount = penaltyAmount;
-    updateData.penalty_reason = penaltyReason || null;
-  }
-  
-  const { error } = await supabase
-    .from(`${lab}.returns`)
-    .update(updateData)
-    .eq('id', returnId);
-  
-  if (error) {
-    console.error('Error verifying return:', error);
-    return { error: error.message };
-  }
-  
-  revalidatePath(`/labs/${lab}/returns`);
-  return { success: true };
-}
-
-// =====================================================
-// EQUIPMENT MANAGEMENT (Admin Only)
-// =====================================================
-
-export async function addEquipment(
-  lab: LabSchema,
-  equipmentData: {
-    equipment_code: string;
-    equipment_name: string;
-    category: string;
-    metadata: Record<string, any>;
-    location?: string;
-    condition?: string;
-    notes?: string;
-  }
-) {
-  const supabase = await createClient();
-  
   const { data, error } = await supabase
-    .from(`${lab}.inventory`)
+    .from(`${labSchema}.issues`)
     .insert({
-      ...equipmentData,
-      status: 'available',
+      equipment_id: equipmentId,
+      reported_by: currentUser.id,
+      issue_type: issueType,
+      severity,
+      title,
+      description,
+      status: 'open',
     })
     .select()
     .single();
-  
+
   if (error) {
-    console.error('Error adding equipment:', error);
     return { error: error.message };
   }
-  
-  revalidatePath(`/labs/${lab}`);
-  return { data };
+
+  // Log the action
+  await supabase.rpc('central.log_action', {
+    p_action: 'create_issue',
+    p_entity_type: 'issue',
+    p_entity_id: data.id,
+    p_schema_name: labSchema,
+    p_details: { issue_type: issueType, severity, title },
+  });
+
+  revalidatePath(`/labs/${labSchema}/issues`);
+  return { data: data as Issue };
 }
 
-export async function updateEquipment(
-  lab: LabSchema,
-  equipmentId: string,
-  updateData: Partial<{
-    equipment_name: string;
-    category: string;
-    metadata: Record<string, any>;
-    location: string;
-    condition: string;
-    notes: string;
-    status: string;
-  }>
+export async function getLabIssues(labSchema: 'lab1' | 'lab2') {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from(`${labSchema}.issues`)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { data: data as Issue[] };
+}
+
+export async function resolveIssue(
+  labSchema: 'lab1' | 'lab2',
+  issueId: string,
+  resolution: string,
+  damageCost?: number,
+  fineAmount?: number
 ) {
   const supabase = await createClient();
   
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
+    return { error: 'Not authenticated' };
+  }
+
+  const { data: currentUser } = await supabase
+    .from('central.users')
+    .select('id')
+    .eq('auth_id', authUser.id)
+    .single();
+
+  if (!currentUser) {
+    return { error: 'User not found' };
+  }
+
   const { error } = await supabase
-    .from(`${lab}.inventory`)
-    .update(updateData)
-    .eq('id', equipmentId);
-  
+    .from(`${labSchema}.issues`)
+    .update({
+      status: 'resolved',
+      resolution,
+      resolved_by: currentUser.id,
+      resolved_at: new Date().toISOString(),
+      damage_cost: damageCost || 0,
+      fine_amount: fineAmount || 0,
+    })
+    .eq('id', issueId);
+
   if (error) {
-    console.error('Error updating equipment:', error);
     return { error: error.message };
   }
-  
-  revalidatePath(`/labs/${lab}`);
+
+  // Log the action
+  await supabase.rpc('central.log_action', {
+    p_action: 'resolve_issue',
+    p_entity_type: 'issue',
+    p_entity_id: issueId,
+    p_schema_name: labSchema,
+    p_details: { damage_cost: damageCost, fine_amount: fineAmount },
+  });
+
+  revalidatePath(`/labs/${labSchema}/issues`);
   return { success: true };
 }
 
-export async function deleteEquipment(lab: LabSchema, equipmentId: string) {
+// =====================================================
+// RETURNS ACTIONS
+// =====================================================
+
+export async function getUserReturns(labSchema: 'lab1' | 'lab2') {
   const supabase = await createClient();
   
-  // Soft delete by setting status to retired
-  const { error } = await supabase
-    .from(`${lab}.inventory`)
-    .update({ status: 'retired' })
-    .eq('id', equipmentId);
-  
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) {
+    return { error: 'Not authenticated' };
+  }
+
+  const { data: currentUser } = await supabase
+    .from('central.users')
+    .select('id')
+    .eq('auth_id', authUser.id)
+    .single();
+
+  if (!currentUser) {
+    return { error: 'User not found' };
+  }
+
+  const { data, error } = await supabase
+    .from(`${labSchema}.returns`)
+    .select('*')
+    .eq('borrower_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
   if (error) {
-    console.error('Error deleting equipment:', error);
     return { error: error.message };
   }
+
+  return { data: data as Return[] };
+}
+
+export async function getLabReturns(labSchema: 'lab1' | 'lab2') {
+  const supabase = await createClient();
   
-  revalidatePath(`/labs/${lab}`);
-  return { success: true };
+  const { data, error } = await supabase
+    .from(`${labSchema}.returns`)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { data: data as Return[] };
 }

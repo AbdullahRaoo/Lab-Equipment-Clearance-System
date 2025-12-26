@@ -240,3 +240,91 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+-- =====================================================
+-- API ACCESS FUNCTIONS FOR CENTRAL SCHEMA
+-- =====================================================
+
+-- Grant usage on central schema to authenticated users
+GRANT USAGE ON SCHEMA central TO authenticated;
+GRANT SELECT ON central.users TO authenticated;
+GRANT INSERT ON central.users TO service_role;
+GRANT UPDATE ON central.users TO authenticated;
+
+-- Function to create user profile (called after auth signup)
+CREATE OR REPLACE FUNCTION central.create_user_profile(
+  p_auth_id UUID,
+  p_email VARCHAR,
+  p_full_name VARCHAR,
+  p_role VARCHAR,
+  p_department VARCHAR DEFAULT NULL,
+  p_student_id VARCHAR DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_user_id UUID;
+BEGIN
+  INSERT INTO central.users (
+    auth_id,
+    email,
+    full_name,
+    role,
+    department,
+    student_id,
+    assigned_labs
+  ) VALUES (
+    p_auth_id,
+    p_email,
+    p_full_name,
+    p_role,
+    p_department,
+    p_student_id,
+    '{}'
+  )
+  RETURNING id INTO v_user_id;
+  
+  RETURN v_user_id;
+END;
+$$;
+
+-- Function to get user profile by auth_id
+CREATE OR REPLACE FUNCTION central.get_user_by_auth_id(p_auth_id UUID)
+RETURNS TABLE (
+  id UUID,
+  auth_id UUID,
+  email VARCHAR,
+  full_name VARCHAR,
+  role VARCHAR,
+  department VARCHAR,
+  student_id VARCHAR,
+  phone VARCHAR,
+  assigned_labs TEXT[],
+  is_active BOOLEAN,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    u.id,
+    u.auth_id,
+    u.email,
+    u.full_name,
+    u.role,
+    u.department,
+    u.student_id,
+    u.phone,
+    u.assigned_labs,
+    u.is_active,
+    u.created_at,
+    u.updated_at
+  FROM central.users u
+  WHERE u.auth_id = p_auth_id;
+END;
+$$;

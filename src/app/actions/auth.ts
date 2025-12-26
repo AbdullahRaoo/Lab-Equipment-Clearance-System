@@ -34,18 +34,14 @@ export async function signUp(formData: FormData) {
   }
 
   // 2. Create user profile in central schema
-  const { error: profileError } = await supabase
-    .schema('central')
-    .from('users')
-    .insert({
-      auth_id: authData.user.id,
-      email,
-      full_name: fullName,
-      role: role || 'student',
-      department: department || null,
-      student_id: studentId || null,
-      assigned_labs: [],
-    });
+  const { data: userId, error: profileError } = await supabase.rpc('central.create_user_profile', {
+    p_auth_id: authData.user.id,
+    p_email: email,
+    p_full_name: fullName,
+    p_role: role || 'student',
+    p_department: department || null,
+    p_student_id: studentId || null,
+  });
 
   if (profileError) {
     return { error: profileError.message };
@@ -122,17 +118,14 @@ export async function getCurrentUser() {
     return null;
   }
 
-  const { data: user, error } = await supabase
-    .schema('central')
-    .from('users')
-    .select('*')
-    .eq('auth_id', authUser.id)
-    .single();
+  const { data: user, error } = await supabase.rpc('central.get_user_by_auth_id', {
+    p_auth_id: authUser.id,
+  });
 
   if (error) {
     console.error('Error fetching user:', error);
     return null;
   }
 
-  return user;
+  return user?.[0] || null;
 }

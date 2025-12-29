@@ -17,12 +17,12 @@ export default async function ClearancePage() {
     redirect('/login');
   }
   
-  // Get user profile
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('auth_id', user.id)
-    .single();
+  // Get user profile using RPC
+  const { data: profileData } = await supabase.rpc('get_user_by_auth_id', {
+    p_auth_id: user.id,
+  });
+  
+  const profile = profileData?.[0];
   
   if (!profile) {
     redirect('/login');

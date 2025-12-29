@@ -11,8 +11,10 @@ import type { Equipment, Issue, Return } from '@/types/lab';
 export async function getLabInventory(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' | 'lab5') {
   const supabase = await createClient();
   
+  // Use schema-qualified query with proper escaping
   const { data, error } = await supabase
-    .from(`${labSchema}.inventory`)
+    .schema(labSchema)
+    .from('inventory')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -28,7 +30,8 @@ export async function getAvailableEquipment(labSchema: 'lab1' | 'lab2' | 'lab3' 
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .from(`${labSchema}.inventory`)
+    .schema(labSchema)
+    .from('inventory')
     .select('*')
     .eq('status', 'available')
     .order('equipment_name');
@@ -44,7 +47,8 @@ export async function getEquipmentById(labSchema: 'lab1' | 'lab2' | 'lab3' | 'la
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .from(`${labSchema}.inventory`)
+    .schema(labSchema)
+    .from('inventory')
     .select('*')
     .eq('id', equipmentId)
     .single();
@@ -70,7 +74,8 @@ export async function borrowEquipment(
   }
 
   const { data: currentUser } = await supabase
-    .from('central.users')
+    .schema('central')
+    .from('users')
     .select('id')
     .eq('auth_id', authUser.id)
     .single();
@@ -81,7 +86,8 @@ export async function borrowEquipment(
 
   // Update equipment status
   const { error: updateError } = await supabase
-    .from(`${labSchema}.inventory`)
+    .schema(labSchema)
+    .from('inventory')
     .update({
       status: 'borrowed',
       current_borrower_id: currentUser.id,
@@ -97,7 +103,8 @@ export async function borrowEquipment(
 
   // Create return record
   const { error: returnError } = await supabase
-    .from(`${labSchema}.returns`)
+    .schema(labSchema)
+    .from('returns')
     .insert({
       equipment_id: equipmentId,
       borrower_id: currentUser.id,
@@ -138,7 +145,8 @@ export async function returnEquipment(
   }
 
   const { data: currentUser } = await supabase
-    .from('central.users')
+    .schema('central')
+    .from('users')
     .select('id')
     .eq('auth_id', authUser.id)
     .single();
@@ -149,7 +157,8 @@ export async function returnEquipment(
 
   // Get return record
   const { data: returnRecord, error: fetchError } = await supabase
-    .from(`${labSchema}.returns`)
+    .schema(labSchema)
+    .from('returns')
     .select('*, equipment_id')
     .eq('id', returnId)
     .single();
@@ -167,7 +176,8 @@ export async function returnEquipment(
 
   // Update return record
   const { error: updateReturnError } = await supabase
-    .from(`${labSchema}.returns`)
+    .schema(labSchema)
+    .from('returns')
     .update({
       actual_return_date: actualReturnDate.toISOString(),
       status: 'returned',
@@ -186,7 +196,8 @@ export async function returnEquipment(
 
   // Update equipment status
   const { error: updateEquipmentError } = await supabase
-    .from(`${labSchema}.inventory`)
+    .schema(labSchema)
+    .from('inventory')
     .update({
       status: 'available',
       current_borrower_id: null,
@@ -237,7 +248,8 @@ export async function createIssue(
   }
 
   const { data: currentUser } = await supabase
-    .from('central.users')
+    .schema('central')
+    .from('users')
     .select('id')
     .eq('auth_id', authUser.id)
     .single();
@@ -247,7 +259,8 @@ export async function createIssue(
   }
 
   const { data, error } = await supabase
-    .from(`${labSchema}.issues`)
+    .schema(labSchema)
+    .from('issues')
     .insert({
       equipment_id: equipmentId,
       reported_by: currentUser.id,
@@ -281,7 +294,8 @@ export async function getLabIssues(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4' 
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .from(`${labSchema}.issues`)
+    .schema(labSchema)
+    .from('issues')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -307,7 +321,8 @@ export async function resolveIssue(
   }
 
   const { data: currentUser } = await supabase
-    .from('central.users')
+    .schema('central')
+    .from('users')
     .select('id')
     .eq('auth_id', authUser.id)
     .single();
@@ -317,7 +332,8 @@ export async function resolveIssue(
   }
 
   const { error } = await supabase
-    .from(`${labSchema}.issues`)
+    .schema(labSchema)
+    .from('issues')
     .update({
       status: 'resolved',
       resolution,
@@ -358,7 +374,8 @@ export async function getUserReturns(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4
   }
 
   const { data: currentUser } = await supabase
-    .from('central.users')
+    .schema('central')
+    .from('users')
     .select('id')
     .eq('auth_id', authUser.id)
     .single();
@@ -368,7 +385,8 @@ export async function getUserReturns(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4
   }
 
   const { data, error } = await supabase
-    .from(`${labSchema}.returns`)
+    .schema(labSchema)
+    .from('returns')
     .select('*')
     .eq('borrower_id', currentUser.id)
     .order('created_at', { ascending: false });
@@ -384,7 +402,8 @@ export async function getLabReturns(labSchema: 'lab1' | 'lab2' | 'lab3' | 'lab4'
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .from(`${labSchema}.returns`)
+    .schema(labSchema)
+    .from('returns')
     .select('*')
     .order('created_at', { ascending: false });
 

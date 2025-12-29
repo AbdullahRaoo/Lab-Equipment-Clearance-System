@@ -19,6 +19,7 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/auth/callback`,
       data: {
         full_name: fullName,
       },
@@ -34,7 +35,7 @@ export async function signUp(formData: FormData) {
   }
 
   // 2. Create user profile in central schema
-  const { data: userId, error: profileError } = await supabase.rpc('central.create_user_profile', {
+  const { data: userId, error: profileError } = await supabase.rpc('create_user_profile', {
     p_auth_id: authData.user.id,
     p_email: email,
     p_full_name: fullName,
@@ -48,7 +49,7 @@ export async function signUp(formData: FormData) {
   }
 
   // 3. Log the action
-  await supabase.rpc('central.log_action', {
+  await supabase.rpc('log_action', {
     p_action: 'user_signup',
     p_entity_type: 'user',
     p_entity_id: authData.user.id,
@@ -56,7 +57,15 @@ export async function signUp(formData: FormData) {
   });
 
   revalidatePath('/', 'layout');
-  redirect('/dashboard');
+  
+  // Check if email confirmation is required
+  if (authData.session) {
+    // User is auto-logged in (email confirmation disabled)
+    redirect('/dashboard');
+  } else {
+    // Email confirmation required
+    redirect('/verify-email');
+  }
 }
 
 export async function signIn(formData: FormData) {
@@ -71,11 +80,18 @@ export async function signIn(formData: FormData) {
   });
 
   if (error) {
+    if (error.message.includes('Email not confirmed')) {
+      return { error: 'Please verify your email before logging in. Check your inbox for the confirmation link.' };
+    }
     return { error: error.message };
   }
 
+  if (!data.user) {
+    return { error: 'Login failed. Please try again.' };
+  }
+
   // Log the action
-  await supabase.rpc('central.log_action', {
+  await supabase.rpc('log_action', {
     p_action: 'user_login',
     p_entity_type: 'user',
     p_entity_id: data.user.id,
@@ -94,7 +110,7 @@ export async function signOut() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    await supabase.rpc('central.log_action', {
+    await supabase.rpc('log_action', {
       p_action: 'user_logout',
       p_entity_type: 'user',
       p_entity_id: user.id,
@@ -108,24 +124,35 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (!authUser) {
+    if (authError || !authUser) {
+      return null;
+    }
+
+    const { data: user, error } = await supabase.rpc('get_user_by_auth_id', {
+      p_auth_id: authUser.id,
+    });
+
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+
+    if (!user || user.length === 0) {
+      console.error('User profile not found for auth user:', authUser.id);
+      return null;
+    }
+
+    return user[0];
+  } catch (error) {
+    console.error('Unexpected error in getCurrentUser:', error);
     return null;
   }
-
-  const { data: user, error } = await supabase.rpc('central.get_user_by_auth_id', {
-    p_auth_id: authUser.id,
-  });
-
-  if (error) {
-    console.error('Error fetching user:', error);
-    return null;
-  }
-
-  return user?.[0] || null;
 }

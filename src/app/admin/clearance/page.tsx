@@ -1,41 +1,41 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getActiveClearanceRequests, getCrossLabStatistics } from '@/app/actions/clearance';
-import { LAB_NAMES, REQUEST_TYPE_LABELS, STATUS_COLORS, LAB_STATUS_COLORS } from '@/types/clearance';
+import { LAB_NAMES, REQUEST_TYPE_LABELS, STATUS_COLORS, LAB_STATUS_COLORS, ClearanceStatus, LabClearanceStatus, ClearanceRequestType } from '@/types/clearance';
 import Link from 'next/link';
 import { ReviewClearanceButton } from './ReviewClearanceButton';
 
 export default async function AdminClearancePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     redirect('/login');
   }
-  
+
   // Get user profile and verify admin access
   const { data: profile } = await supabase
     .from('users')
     .select('*')
     .eq('auth_id', user.id)
     .single();
-  
+
   if (!profile || !['admin', 'lab_admin'].includes(profile.role)) {
     redirect('/dashboard');
   }
-  
+
   // Fetch active clearance requests
   const { data: requests } = await getActiveClearanceRequests();
-  
+
   // Fetch cross-lab statistics
   const { data: stats } = await getCrossLabStatistics();
-  
+
   // Calculate aggregate stats
   const totalEquipment = stats?.reduce((sum, lab) => sum + lab.total_equipment, 0) || 0;
   const totalBorrowed = stats?.reduce((sum, lab) => sum + lab.borrowed_equipment, 0) || 0;
   const totalIssues = stats?.reduce((sum, lab) => sum + lab.active_issues, 0) || 0;
   const totalFines = stats?.reduce((sum, lab) => sum + lab.total_fines_collected, 0) || 0;
-  
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -54,7 +54,7 @@ export default async function AdminClearancePage() {
             Back to Dashboard
           </Link>
         </div>
-        
+
         {/* System-wide Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -70,7 +70,7 @@ export default async function AdminClearancePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -84,7 +84,7 @@ export default async function AdminClearancePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -98,7 +98,7 @@ export default async function AdminClearancePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -113,7 +113,7 @@ export default async function AdminClearancePage() {
             </div>
           </div>
         </div>
-        
+
         {/* Lab-wise Statistics */}
         {stats && stats.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -148,13 +148,13 @@ export default async function AdminClearancePage() {
             </div>
           </div>
         )}
-        
+
         {/* Active Clearance Requests */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">
             Active Clearance Requests ({requests?.length || 0})
           </h2>
-          
+
           {requests && requests.length > 0 ? (
             <div className="space-y-4">
               {requests.map((request) => (
@@ -168,7 +168,7 @@ export default async function AdminClearancePage() {
                       )}
                     </div>
                     <div className="text-right">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[request.status]}`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[request.status as ClearanceStatus]}`}>
                         {request.status.replace('_', ' ').toUpperCase()}
                       </span>
                       <p className="text-xs text-gray-500 mt-1">
@@ -176,25 +176,24 @@ export default async function AdminClearancePage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <p className="text-sm text-gray-600">Request Type:</p>
-                    <p className="text-sm font-medium">{REQUEST_TYPE_LABELS[request.request_type]}</p>
+                    <p className="text-sm font-medium">{REQUEST_TYPE_LABELS[request.request_type as ClearanceRequestType]}</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
                     {(['lab1', 'lab2', 'lab3', 'lab4', 'lab5'] as const).map((lab) => (
                       <div key={lab} className="text-center p-2 border rounded">
                         <p className="text-xs text-gray-600 mb-1">{LAB_NAMES[lab]}</p>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          LAB_STATUS_COLORS[request[`${lab}_status`]]
-                        }`}>
-                          {request[`${lab}_status`].replace('_', ' ')}
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${LAB_STATUS_COLORS[request[`${lab}_status`] as LabClearanceStatus]
+                          }`}>
+                          {(request[`${lab}_status`] as string).replace('_', ' ')}
                         </span>
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="flex justify-between items-center pt-3 border-t">
                     <div>
                       {request.all_labs_cleared ? (

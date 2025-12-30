@@ -4,8 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 // GET /api/users/[id] - Get user by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: userId } = await params;
   try {
     const supabase = await createClient();
 
@@ -30,7 +31,7 @@ export async function GET(
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
 
-    const userId = params.id;
+    // userId already destructured above
 
     // Users can view their own profile, admins can view any profile
     if (currentUser.id !== parseInt(userId) && currentUser.role !== 'admin') {
@@ -63,8 +64,9 @@ export async function GET(
 // PUT /api/users/[id] - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: userId } = await params;
   try {
     const supabase = await createClient();
 
@@ -89,7 +91,7 @@ export async function PUT(
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
 
-    const userId = params.id;
+    // userId already destructured above
 
     // Users can update their own profile (limited fields), admins can update any profile
     const isOwnProfile = currentUser.id === parseInt(userId);
@@ -159,8 +161,9 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete user (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: userId } = await params;
   try {
     const supabase = await createClient();
 
@@ -185,7 +188,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const userId = params.id;
+    // userId already destructured above
 
     // Prevent self-deletion
     if (currentUser.id === parseInt(userId)) {

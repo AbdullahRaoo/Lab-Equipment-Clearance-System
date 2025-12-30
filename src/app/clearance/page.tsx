@@ -1,50 +1,51 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { 
-  getUserLatestClearanceRequest, 
+import {
+  getUserLatestClearanceRequest,
   checkUserClearanceEligibility,
   getAllUserBorrowedEquipment,
   getAllUserUnpaidIssues
 } from '@/app/actions/clearance';
 import { LAB_NAMES, REQUEST_TYPE_LABELS, STATUS_COLORS, LAB_STATUS_COLORS } from '@/types/clearance';
 import { CreateClearanceRequestForm } from './CreateClearanceRequestForm';
+import Link from 'next/link';
 
 export default async function ClearancePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     redirect('/login');
   }
-  
+
   // Get user profile using RPC
   const { data: profileData } = await supabase.rpc('get_user_by_auth_id', {
     p_auth_id: user.id,
   });
-  
+
   const profile = profileData?.[0];
-  
+
   if (!profile) {
     redirect('/login');
   }
-  
+
   // Fetch latest clearance request
   const { data: latestRequest } = await getUserLatestClearanceRequest();
-  
+
   // Fetch eligibility status
   const { data: eligibility } = await checkUserClearanceEligibility();
-  
+
   // Fetch borrowed equipment
   const { data: borrowedEquipment } = await getAllUserBorrowedEquipment();
-  
+
   // Fetch unpaid issues
   const { data: unpaidIssues } = await getAllUserUnpaidIssues();
-  
+
   // Calculate summary
   const totalBorrowed = borrowedEquipment?.length || 0;
   const totalUnpaid = unpaidIssues?.reduce((sum, issue) => sum + issue.total_amount, 0) || 0;
   const hasBlockingIssues = eligibility?.some(e => !e.is_eligible) || false;
-  
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -55,7 +56,7 @@ export default async function ClearancePage() {
             Request and track your equipment clearance status across all labs
           </p>
         </div>
-        
+
         {/* User Info Card */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Your Information</h2>
@@ -74,7 +75,7 @@ export default async function ClearancePage() {
             </div>
           </div>
         </div>
-        
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -90,7 +91,7 @@ export default async function ClearancePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -104,7 +105,7 @@ export default async function ClearancePage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -125,7 +126,7 @@ export default async function ClearancePage() {
             </div>
           </div>
         </div>
-        
+
         {/* Lab-wise Eligibility Status */}
         {eligibility && eligibility.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -135,13 +136,12 @@ export default async function ClearancePage() {
                 <div key={lab.lab_schema} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold">{LAB_NAMES[lab.lab_schema]}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      lab.is_eligible ? LAB_STATUS_COLORS.cleared : LAB_STATUS_COLORS.issues_found
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${lab.is_eligible ? LAB_STATUS_COLORS.cleared : LAB_STATUS_COLORS.issues_found
+                      }`}>
                       {lab.is_eligible ? 'Cleared' : 'Issues Found'}
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Borrowed</p>
@@ -160,7 +160,7 @@ export default async function ClearancePage() {
                       <p className="font-medium">${lab.total_unpaid_amount.toFixed(2)}</p>
                     </div>
                   </div>
-                  
+
                   {lab.issues && lab.issues.length > 0 && (
                     <div className="mt-3 pt-3 border-t">
                       <p className="text-sm font-medium text-red-600 mb-1">Issues:</p>
@@ -176,7 +176,7 @@ export default async function ClearancePage() {
             </div>
           </div>
         )}
-        
+
         {/* Latest Clearance Request */}
         {latestRequest && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -191,7 +191,7 @@ export default async function ClearancePage() {
                   {latestRequest.status.replace('_', ' ').toUpperCase()}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Created</p>
@@ -204,26 +204,40 @@ export default async function ClearancePage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="border-t pt-4">
                 <p className="text-sm font-medium mb-2">Lab Status:</p>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {(['lab1', 'lab2', 'lab3', 'lab4', 'lab5'] as const).map((lab) => (
                     <div key={lab} className="text-center">
                       <p className="text-xs text-gray-600 mb-1">{LAB_NAMES[lab]}</p>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        LAB_STATUS_COLORS[latestRequest[`${lab}_status`]]
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${LAB_STATUS_COLORS[latestRequest[`${lab}_status`]]
+                        }`}>
                         {latestRequest[`${lab}_status`].replace('_', ' ')}
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* View Certificate Button - shown when approved */}
+              {latestRequest.status === 'approved' && (
+                <div className="border-t pt-4 mt-4">
+                  <Link
+                    href={`/clearance/certificate/${latestRequest.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    View Clearance Certificate
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
-        
+
         {/* Borrowed Equipment Details */}
         {borrowedEquipment && borrowedEquipment.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -266,7 +280,7 @@ export default async function ClearancePage() {
             </div>
           </div>
         )}
-        
+
         {/* Unpaid Issues Details */}
         {unpaidIssues && unpaidIssues.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -290,12 +304,11 @@ export default async function ClearancePage() {
                       <td className="py-3 px-4 text-sm">{issue.issue_type}</td>
                       <td className="py-3 px-4 text-sm">{issue.description}</td>
                       <td className="py-3 px-4 text-sm">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          issue.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${issue.severity === 'critical' ? 'bg-red-100 text-red-800' :
                           issue.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                          issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                            issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-blue-100 text-blue-800'
+                          }`}>
                           {issue.severity}
                         </span>
                       </td>
@@ -308,7 +321,7 @@ export default async function ClearancePage() {
             </div>
           </div>
         )}
-        
+
         {/* Create New Request Form */}
         {(!latestRequest || ['approved', 'rejected'].includes(latestRequest.status)) && (
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -323,7 +336,7 @@ export default async function ClearancePage() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-yellow-700">
-                      You have outstanding issues that must be resolved before clearance can be approved. 
+                      You have outstanding issues that must be resolved before clearance can be approved.
                       Please return all borrowed equipment and pay any outstanding fines.
                     </p>
                   </div>

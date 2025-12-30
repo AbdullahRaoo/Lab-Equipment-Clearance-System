@@ -1,0 +1,160 @@
+4-Stage Project Roadmap - ECMS
+
+
+Stage 1: Foundation & Database Setup
+
+M1 (Central DB & Auth):
+
+Set up project and central schema
+Create users table with role-based access control
+Implement authentication system (sign-up, login, session management)
+Create global audit logs table
+Set up RLS policies for central schema
+
+
+M2 (Labs 1-2):
+
+Create Lab 1 and Lab 2 schemas in Postgres
+Design inventory table structure (JSONB for equipment metadata)
+Create issues table for Lab 1 and Lab 2
+Create returns table for Lab 1 and Lab 2
+Set up basic indexes for performance
+
+
+M3 (Labs 3-5):
+
+Create Lab 3, Lab 4, and Lab 5 schemas in Postgres
+Design inventory table structure (JSONB for equipment metadata)
+Create issues table for Lab 3, Lab 4, and Lab 5
+Create returns table for Lab 3, Lab 4, and Lab 5
+Set up basic indexes for performance
+
+
+M4 (Inter-lab System):
+
+Design cross-schema query architecture
+Create database functions for multi-schema access
+Set up connection pooling and query optimization strategy
+Design clearance status enumeration and workflow states
+Document schema relationship mappings
+
+
+Stage 2: Core Business Logic & Triggers
+
+M1 (Central DB & Auth):
+
+Implement user profile management API routes
+Create role assignment and permission middleware
+Build authentication guards for Next.js routes
+Create central logging triggers for all schema operations
+Implement user-to-lab assignment logic
+
+
+M2 (Labs 1-2):
+
+Create triggers for inventory status updates (borrowed, returned, pending)
+Build stored procedures for issue registration
+Implement return workflow logic with validation
+Create database functions for equipment availability checks
+Build JSONB query functions for equipment search
+
+
+M3 (Labs 3-5):
+
+Create triggers for inventory status updates (borrowed, returned, pending)
+Build stored procedures for clearance request creation
+Implement approval/rejection workflow triggers
+Create database functions for pending requests by user
+Build notification trigger system for status changes
+
+
+M4 (Inter-lab System):
+
+Create stored procedure for multi-schema clearance check
+Build aggregation functions for cross-lab reports
+Implement inter-lab transfer logic and triggers
+Create clearance certificate generation function
+Design clearance validation algorithm (checks all 5 labs)
+
+
+Stage 3: API Development & Frontend Integration
+
+M1 (Central DB & Auth):
+
+Build Next.js API routes for user management
+Create admin dashboard for user oversight
+Implement authentication UI components
+Build role-based navigation system
+Create global activity log viewer
+
+
+M2 (Labs 1-2):
+
+Build Next.js API routes for Lab 1 & 2 inventory operations
+Create equipment registration forms
+Implement issue reporting interface
+Build return processing UI
+Create inventory dashboard for Lab 1 & 2
+
+
+M3 (Labs 3-5):
+
+Build Next.js API routes for Lab 3-5 inventory operations
+Create clearance request submission forms
+Implement request approval interface for lab admins
+Build user request tracking dashboard
+Create equipment search and filter UI
+
+
+M4 (Inter-lab System):
+
+Build Next.js API routes for clearance reports
+Create clearance certificate page with PDF export
+Implement cross-lab analytics dashboard
+Build inter-lab transfer interface
+Create clearance status checker tool
+
+
+Stage 4: Testing, Optimization & Deployment
+
+M1 (Central DB & Auth):
+
+Write integration tests for authentication flows
+Perform security audit on RLS policies
+Optimize central schema queries and indexes
+Configure production environment variables
+Set up Supabase backup and recovery procedures
+
+
+M2 (Labs 1-2):
+
+Write unit tests for Lab 1 & 2 triggers and functions
+Performance test inventory JSONB queries
+Optimize trigger execution time
+Load test issue/return workflows
+Create Lab 1-2 data migration scripts
+
+
+M3 (Labs 3-5):
+
+Write unit tests for Lab 3-5 triggers and functions
+Performance test clearance request queries
+Optimize notification trigger performance
+Load test approval workflows
+Create Lab 3-5 data migration scripts
+
+
+M4 (Inter-lab System):
+
+Write integration tests for multi-schema queries
+Performance test clearance check stored procedure
+Optimize cross-lab aggregation queries
+Build monitoring dashboard for system health
+Deploy application and configure production database connections
+
+
+Dependencies:
+
+Stage 2 depends on Stage 1 completion (all schemas must exist)
+Stage 3 depends on Stage 2 completion (business logic must be functional)
+Stage 4 can begin incrementally after Stage 3 features are implemented

@@ -44,4 +44,4 @@ next-env.d.ts
 *.md
 !README.md
 
-/plan.txt
+#/plan.txt

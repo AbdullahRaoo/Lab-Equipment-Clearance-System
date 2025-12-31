@@ -16,38 +16,38 @@ export interface ClearanceRequest {
   status: ClearanceStatus;
   request_type: ClearanceRequestType;
   reason?: string;
-  
+
   // Individual lab statuses
   lab1_status: LabClearanceStatus;
   lab2_status: LabClearanceStatus;
   lab3_status: LabClearanceStatus;
   lab4_status: LabClearanceStatus;
   lab5_status: LabClearanceStatus;
-  
+
   // Lab-specific notes
   lab1_notes?: string;
   lab2_notes?: string;
   lab3_notes?: string;
   lab4_notes?: string;
   lab5_notes?: string;
-  
+
   // Review tracking
   lab1_reviewed_by?: string;
   lab2_reviewed_by?: string;
   lab3_reviewed_by?: string;
   lab4_reviewed_by?: string;
   lab5_reviewed_by?: string;
-  
+
   lab1_reviewed_at?: Date;
   lab2_reviewed_at?: Date;
   lab3_reviewed_at?: Date;
   lab4_reviewed_at?: Date;
   lab5_reviewed_at?: Date;
-  
+
   // Final approval
   final_approved_by?: string;
   final_approved_at?: Date;
-  
+
   // Timestamps
   created_at: Date;
   updated_at: Date;
@@ -168,11 +168,11 @@ export interface UpdateLabClearanceStatusData {
 
 // Lab name mapping
 export const LAB_NAMES: Record<LabSchema, string> = {
-  lab1: 'Physics Lab',
-  lab2: 'Chemistry Lab',
-  lab3: 'Biology Lab',
-  lab4: 'Electronics Lab',
-  lab5: 'Computer Science Lab'
+  lab1: 'Robotic Lab',
+  lab2: 'DLD Lab',
+  lab3: 'IOT Lab',
+  lab4: 'Embedded Design Lab',
+  lab5: 'Computer & Network Lab'
 };
 
 // Request type labels

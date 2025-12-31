@@ -50,7 +50,7 @@ BEGIN
             v_user_id,
             TG_TABLE_SCHEMA,
             v_action_details,
-            current_setting('request.headers', true)::json->>'x-real-ip',
+            (NULLIF(current_setting('request.headers', true)::json->>'x-real-ip', ''))::inet,
             current_setting('request.headers', true)::json->>'user-agent'
         );
         
@@ -88,7 +88,7 @@ BEGIN
                 v_user_id,
                 TG_TABLE_SCHEMA,
                 v_action_details,
-                current_setting('request.headers', true)::json->>'x-real-ip',
+                (NULLIF(current_setting('request.headers', true)::json->>'x-real-ip', ''))::inet,
                 current_setting('request.headers', true)::json->>'user-agent'
             );
         END IF;
@@ -119,7 +119,7 @@ BEGIN
             v_user_id,
             TG_TABLE_SCHEMA,
             v_action_details,
-            current_setting('request.headers', true)::json->>'x-real-ip',
+            (NULLIF(current_setting('request.headers', true)::json->>'x-real-ip', ''))::inet,
             current_setting('request.headers', true)::json->>'user-agent'
         );
         
@@ -164,11 +164,13 @@ END;
 $$;
 
 -- Create updated_at triggers for all central tables
+DROP TRIGGER IF EXISTS set_updated_at ON central.users;
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON central.users
     FOR EACH ROW
     EXECUTE FUNCTION central.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS set_updated_at ON central.clearance_requests;
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON central.clearance_requests
     FOR EACH ROW

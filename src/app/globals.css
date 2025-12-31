@@ -4,10 +4,11 @@
   --background: #ffffff;
   --foreground: #111827;
   
-  /* ECMS Color Scheme */
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-light: #dbeafe;
+  /* NUTECH Color Scheme */
+  --color-primary: #105a4b;
+  --color-primary-hover: #0d473b;
+  --color-primary-light: #e6f5f3;
+  --color-brand-secondary: #333333;
   
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;

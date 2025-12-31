@@ -1,5 +1,13 @@
 import Link from 'next/link';
-import { LAB_NAMES } from '@/types/clearance';
+
+// Static list for display until we pass labs prop
+const STATIC_LABS = [
+    { code: 'ROBO', name: 'Robotic Lab' },
+    { code: 'DLD', name: 'DLD Lab' },
+    { code: 'IOT', name: 'IOT Lab' },
+    { code: 'EMB', name: 'Embedded Design Lab' },
+    { code: 'CNET', name: 'Computer & Network Lab' }
+];
 
 interface SuperAdminDashboardProps {
     user: any;
@@ -24,8 +32,8 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
                         href="/admin/clearance"
                         className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-blue-500 hover:bg-gray-750 transition-all"
                     >
-                        <h3 className="text-lg font-semibold text-blue-400">Clearance Requests</h3>
-                        <p className="text-sm text-gray-400 mt-1">Review & override any request</p>
+                        <h3 className="text-lg font-semibold text-blue-400">Review Requests</h3>
+                        <p className="text-sm text-gray-400 mt-1">Approve borrow requests</p>
                     </Link>
 
                     <button className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 hover:bg-gray-750 transition-all text-left">
@@ -37,26 +45,34 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
                         <h3 className="text-lg font-semibold text-orange-400">System Logs</h3>
                         <p className="text-sm text-gray-400 mt-1">View audit trail & security</p>
                     </button>
+
+                    <Link
+                        href="/procurement"
+                        className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-yellow-500 hover:bg-gray-750 transition-all"
+                    >
+                        <h3 className="text-lg font-semibold text-yellow-400">Procurement</h3>
+                        <p className="text-sm text-gray-400 mt-1">Manage new purchase requests</p>
+                    </Link>
                 </div>
             </div>
 
             <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">All Laboratories</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(Object.entries(LAB_NAMES) as [string, string][]).map(([key, name]) => (
+                    {STATIC_LABS.map((lab) => (
                         <Link
-                            key={key}
-                            href={`/labs/${key}`}
+                            key={lab.code}
+                            href={`/inventory?lab=${lab.code}`}
                             className="group bg-white p-5 rounded-lg border border-gray-200 hover:border-gray-900 hover:shadow-md transition-all duration-200"
                         >
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{key.replace('lab', 'Lab ')}</span>
+                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{lab.code}</span>
                                 <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
                                     Admin Access
                                 </span>
                             </div>
                             <h4 className="font-bold text-gray-900 text-lg group-hover:text-gray-900 transition-colors">
-                                {name}
+                                {lab.name}
                             </h4>
                             <p className="text-sm text-gray-500 mt-1">Full inventory control</p>
                         </Link>

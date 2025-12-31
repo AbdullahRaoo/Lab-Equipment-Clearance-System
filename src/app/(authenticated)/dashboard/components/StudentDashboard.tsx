@@ -1,5 +1,14 @@
 import Link from 'next/link';
-import { LAB_NAMES } from '@/types/clearance';
+// import { LAB_NAMES } from '@/types/clearance';  // Deprecated type
+
+// Hardcoded for now to match Seed Data until we pass labs prop
+const LABS_LIST = [
+    { name: 'Robotic Lab', code: 'ROBO' },
+    { name: 'DLD Lab', code: 'DLD' },
+    { name: 'IOT Lab', code: 'IOT' },
+    { name: 'Embedded Design Lab', code: 'EMB' },
+    { name: 'Computer & Network Lab', code: 'CNET' }
+];
 
 interface StudentDashboardProps {
     user: any;
@@ -13,9 +22,9 @@ export function StudentDashboard({ user }: StudentDashboardProps) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900">Welcome, {user.full_name}</h2>
-                        <p className="text-gray-500 mt-1">Student ID: {user.student_id || 'N/A'}</p>
+                        <p className="text-gray-500 mt-1">Reg No: {user.reg_no || 'N/A'}</p>
                     </div>
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-[#105a4b] text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
                         Student Portal
                     </span>
                 </div>
@@ -63,22 +72,22 @@ export function StudentDashboard({ user }: StudentDashboardProps) {
             <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Browse Laboratories</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(Object.entries(LAB_NAMES) as [string, string][]).map(([key, name]) => (
+                    {LABS_LIST.map((lab) => (
                         <Link
-                            key={key}
-                            href={`/labs/${key}`}
-                            className="group bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200"
+                            key={lab.code}
+                            href={`/inventory?lab=${lab.code}`}
+                            className="group bg-white p-5 rounded-lg border border-gray-200 hover:border-[#105a4b] hover:shadow-md transition-all duration-200"
                         >
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{key.replace('lab', 'Lab ')}</span>
-                                <svg className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{lab.code}</span>
+                                <svg className="w-5 h-5 text-gray-300 group-hover:text-[#105a4b] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
-                            <h4 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
-                                {name}
+                            <h4 className="font-bold text-gray-900 text-lg group-hover:text-[#105a4b] transition-colors">
+                                {lab.name}
                             </h4>
-                            <p className="text-sm text-gray-500 mt-1">View inventory & check availability</p>
+                            <p className="text-sm text-gray-500 mt-1">View inventory</p>
                         </Link>
                     ))}
                 </div>

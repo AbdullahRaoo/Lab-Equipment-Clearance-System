@@ -35,9 +35,43 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Refresh session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+      error
+    } = await supabase.auth.getUser();
+
+    if (error) {
+      // Ignore "Session Missing" error (normal for unauthenticated users)
+      if (error.message.includes('Auth session missing')) {
+        return supabaseResponse;
+      }
+
+      // If error (like 'Refresh Token Not Found'), clear cookies to force re-login
+      // This prevents the infinite loop / crash
+      // request.cookies.delete('sb-...'); // Server action can't delete directly on request object usually in middleware flow like this easily without response
+      // But simply completing response without setting new cookies might work, OR we explicitly delete in response
+
+      console.log("Middleware Auth Error, clearing session:", error.message);
+      const response = NextResponse.next({
+        request: {
+          headers: request.headers,
+        },
+      });
+
+      // Clear all supabase cookies
+      request.cookies.getAll().forEach(cookie => {
+        if (cookie.name.startsWith('sb-')) {
+          response.cookies.delete(cookie.name);
+        }
+      });
+
+      return response;
+    }
+  } catch (e) {
+    // Catch unexpected errors
+    console.error("Middleware Crash:", e);
+  }
 
   return supabaseResponse;
 }

@@ -1,6 +1,7 @@
 -- =====================================================
--- Seed Users Script (NUTECH Edition)
+-- Seed Users Script (NUTECH Edition) - FRESH START
 -- Creates HOD, Pro HOD, Incharges, Assistants, and Students
+-- AGGRESSIVELY DELETES existing users to ensure passwords are correct
 -- =====================================================
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -13,7 +14,7 @@ CREATE OR REPLACE FUNCTION public.seed_user(
     p_lab_code TEXT DEFAULT NULL -- Lab Code (ROBO, DLD, etc.)
 ) RETURNS VOID AS $$
 DECLARE
-    v_auth_id UUID := gen_random_uuid();
+    v_auth_id UUID;
     v_lab_id UUID;
 BEGIN
     -- Get Lab ID if code provided
@@ -21,7 +22,12 @@ BEGIN
         SELECT id INTO v_lab_id FROM public.labs WHERE code = p_lab_code;
     END IF;
 
-    -- 1. Create Identity (Trigger will create student profile)
+    -- 1. CLEANUP: Delete existing user to ensure fresh password
+    DELETE FROM auth.users WHERE email = p_email;
+    
+    -- 2. CREATE FRESH:
+    v_auth_id := gen_random_uuid();
+    
     INSERT INTO auth.users (
         id, email, encrypted_password, email_confirmed_at, raw_user_meta_data, aud, role
     ) VALUES (
@@ -33,17 +39,22 @@ BEGIN
         'authenticated',
         'authenticated'
     );
-
-    -- 2. Update Profile (Upgrade from default student to specific role)
-    UPDATE public.profiles
+    
+    -- 3. ENSURE PROFILE (Trigger handles creation, but we update role immediately)
+    -- We wait a tiny bit or just update? The trigger is BEFORE/AFTER insert?
+    -- Usually trigger on auth.users creates public.users.
+    -- Let's do an explicit UPSERT just in case the trigger didn't fire due to some permission issue (though we fixed that).
+    
+    INSERT INTO public.profiles (id, email, full_name, role, assigned_lab_id)
+    VALUES (v_auth_id, p_email, p_name, p_role, v_lab_id)
+    ON CONFLICT (id) DO UPDATE
     SET 
         role = p_role,
-        assigned_lab_id = v_lab_id, -- Assign specific lab
-        reliability_score = CASE WHEN p_role = 'student' THEN 80 ELSE NULL END, -- Start students at 80
-        reg_no = CASE WHEN p_role = 'student' THEN 'ST-' || floor(random()*10000)::text ELSE NULL END
-    WHERE id = v_auth_id;
+        assigned_lab_id = v_lab_id,
+        reliability_score = CASE WHEN p_role = 'student' THEN 80 ELSE 100 END,
+        reg_no = CASE WHEN p_role = 'student' THEN 'ST-' || floor(random()*10000)::text ELSE NULL END;
 
-    RAISE NOTICE 'Created User: % (%)', p_email, p_role;
+    RAISE NOTICE 'Freshly Created User: % (%)', p_email, p_role;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -51,10 +62,8 @@ $$ LANGUAGE plpgsql;
 DO $$
 BEGIN
     -- Admin Staff
-    IF NOT EXISTS (SELECT 1 FROM public.profiles WHERE role = 'hod') THEN
-        PERFORM public.seed_user('hod@nutech.edu.pk', 'Dr. System HOD', 'hod');
-        PERFORM public.seed_user('prohod@nutech.edu.pk', 'Dr. Pro HOD', 'pro_hod');
-    END IF;
+    PERFORM public.seed_user('hod@nutech.edu.pk', 'Dr. System HOD', 'hod');
+    PERFORM public.seed_user('prohod@nutech.edu.pk', 'Dr. Pro HOD', 'pro_hod');
 
     -- Lab Incharges (Heads)
     PERFORM public.seed_user('incharge.robo@nutech.edu.pk', 'Engr. Robo Head', 'lab_incharge', 'ROBO');

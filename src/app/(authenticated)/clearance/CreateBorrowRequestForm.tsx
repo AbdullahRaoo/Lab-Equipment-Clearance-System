@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createBorrowRequest } from '@/app/actions/borrow';
 import { getInventory, getLabs } from '@/app/actions/inventory';
 import { Lab, InventoryItem } from '@/types/clearance';
@@ -23,22 +24,42 @@ export function CreateBorrowRequestForm() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
+    const searchParams = useSearchParams();
+
     // Fetch Labs on Mount
     useEffect(() => {
         getLabs().then(res => {
-            if (res.data) setLabs(res.data);
+            if (res.data) {
+                setLabs(res.data);
+
+                // Pre-select Lab from URL
+                const urlLabId = searchParams.get('labId');
+                if (urlLabId) setSelectedLab(urlLabId);
+            }
         });
-    }, []);
+    }, [searchParams]);
 
     // Fetch Inventory when Lab changes
     useEffect(() => {
         if (selectedLab) {
             getInventory(selectedLab).then(res => {
-                if (res.data) setInventory(res.data);
+                if (res.data) {
+                    setInventory(res.data);
+
+                    // Pre-select Item from URL if matches lab
+                    const urlItemId = searchParams.get('itemId');
+                    if (urlItemId) {
+                        // Check if item belongs to this lab inventory
+                        const itemExists = res.data.find((i: any) => i.id === urlItemId);
+                        if (itemExists) {
+                            setSelectedItems(prev => prev.includes(urlItemId) ? prev : [...prev, urlItemId]);
+                        }
+                    }
+                }
                 else setInventory([]);
             });
         }
-    }, [selectedLab]);
+    }, [selectedLab, searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

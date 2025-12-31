@@ -20,7 +20,9 @@ export default function AddInventoryPage() {
         serial_no: '',
         asset_tag: '',
         price: '',
-        purchase_date: ''
+        purchase_date: '',
+        supplier: '',
+        maintenance_interval_days: ''
     });
 
     useEffect(() => {
@@ -149,6 +151,29 @@ export default function AddInventoryPage() {
                             value={formData.price}
                             onChange={e => setFormData({ ...formData, price: e.target.value })}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Supplier</label>
+                        <input
+                            type="text"
+                            value={formData.supplier}
+                            onChange={e => setFormData({ ...formData, supplier: e.target.value })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            placeholder="e.g. Tektronix Inc."
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Maintenance Interval (Days)</label>
+                        <input
+                            type="number"
+                            value={formData.maintenance_interval_days}
+                            onChange={e => setFormData({ ...formData, maintenance_interval_days: e.target.value })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            placeholder="e.g. 180"
                         />
                     </div>
                 </div>

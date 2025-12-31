@@ -69,7 +69,8 @@ export async function signIn(formData: FormData) {
   });
 
   if (error) {
-    return { error: error.message };
+    console.error("Login Error:", error.message, error);
+    return { error: 'Invalid login credentials' };
   }
 
   if (!data.user) {

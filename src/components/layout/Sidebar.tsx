@@ -76,6 +76,16 @@ export function Sidebar({ userRole }: SidebarProps) {
             roles: ['lab_incharge', 'lab_assistant']
         },
         {
+            name: 'Analytics',
+            href: '/admin/analytics',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            ),
+            roles: ['hod', 'pro_hod']
+        },
+        {
             name: 'User Management',
             href: '/admin/users',
             icon: (
@@ -94,7 +104,9 @@ export function Sidebar({ userRole }: SidebarProps) {
     return (
         <aside className="w-64 bg-[#105a4b] text-white min-h-screen flex flex-col shadow-xl">
             <div className="p-6 border-b border-[#0d473b]">
-                <NutechLogo variant="light" />
+                <Link href="/dashboard">
+                    <NutechLogo variant="light" />
+                </Link>
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
@@ -123,7 +135,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                     </div>
                     <div>
                         <p className="text-sm font-medium text-white capitalize">{userRole.replace('_', ' ')}</p>
-                        <Link href="/settings" className="text-xs text-gray-400 hover:text-gray-200">Settings</Link>
+                        <Link href="/settings/profile" className="text-xs text-gray-400 hover:text-gray-200">Settings</Link>
                     </div>
                 </div>
             </div>

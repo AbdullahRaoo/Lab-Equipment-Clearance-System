@@ -79,7 +79,16 @@ export default async function InventoryPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button className="text-[#105a4b] hover:text-[#0d473b]">Edit</button>
+                                            <button className="text-[#105a4b] hover:text-[#0d473b] mr-3">Edit</button>
+                                            {/* Request Button for Students */}
+                                            {user.role === 'student' && (
+                                                <Link
+                                                    href={`/clearance?labId=${item.lab_id}&itemId=${item.id}`}
+                                                    className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-[#105a4b] bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#105a4b]"
+                                                >
+                                                    Request
+                                                </Link>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

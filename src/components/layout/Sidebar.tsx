@@ -131,7 +131,7 @@ export function Sidebar({ userRole }: SidebarProps) {
     }, [] as typeof filteredItems);
 
     return (
-        <aside className="w-64 bg-gradient-to-b from-[#105a4b] to-[#0d473b] text-white min-h-screen flex flex-col shadow-xl">
+        <aside className="w-64 bg-gradient-to-b from-[#105a4b] to-[#0d473b] text-white h-screen flex flex-col shadow-xl sticky top-0">
             <div className="p-6 border-b border-white/10">
                 <Link href="/dashboard">
                     <NutechLogo variant="light" />

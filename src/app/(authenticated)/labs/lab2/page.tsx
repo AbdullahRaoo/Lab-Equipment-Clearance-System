@@ -11,6 +11,7 @@ async function LabPage({ labCode, labName }: { labCode: string; labName: string 
   const user = await getCurrentUser();
   if (!user) redirect('/login');
 
+  const role = user.role as UserRole;
   const { data: labs } = await getLabs();
   const lab = labs?.find(l => l.code === labCode);
 
@@ -26,6 +27,11 @@ async function LabPage({ labCode, labName }: { labCode: string; labName: string 
     );
   }
 
+  // Determine edit permissions
+  const isAdmin = ['hod', 'pro_hod', 'oic_cen_labs', 'asst_oic_cen_labs'].includes(role);
+  const isLabStaff = ['lab_engineer', 'lab_assistant'].includes(role);
+  const canEdit = isAdmin || (isLabStaff && user.assigned_lab_id === lab.id);
+
   const { data: inventory } = await getInventory(lab.id);
   const stats = {
     total: inventory?.length || 0,
@@ -33,7 +39,7 @@ async function LabPage({ labCode, labName }: { labCode: string; labName: string 
     borrowed: inventory?.filter(item => item.status === 'borrowed').length || 0,
     maintenance: inventory?.filter(item => item.status === 'maintenance').length || 0,
   };
-  const isStudent = user.role === 'student';
+  const isStudent = role === 'student';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,12 +86,12 @@ async function LabPage({ labCode, labName }: { labCode: string; labName: string 
             <p className="text-3xl font-bold text-yellow-600">{stats.maintenance}</p>
           </div>
         </div>
-        <LabEquipmentTable inventory={inventory || []} labId={lab.id} labCode={labCode} userRole={user.role as UserRole} />
+        <LabEquipmentTable inventory={inventory || []} labId={lab.id} labCode={labCode} userRole={role} canEdit={canEdit} />
       </main>
     </div>
   );
 }
 
 export default async function Lab2Page() {
-  return <LabPage labCode="LAB2" labName="Computer Lab 2" />;
+  return <LabPage labCode="DLD" labName="DLD Lab" />;
 }

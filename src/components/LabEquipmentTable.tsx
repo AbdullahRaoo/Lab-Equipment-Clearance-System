@@ -22,11 +22,12 @@ interface LabEquipmentTableProps {
     labId: string;
     labCode: string;
     userRole: UserRole;
+    canEdit?: boolean; // Whether user can edit items in this specific lab
 }
 
-export function LabEquipmentTable({ inventory, labId, labCode, userRole }: LabEquipmentTableProps) {
+export function LabEquipmentTable({ inventory, labId, labCode, userRole, canEdit = false }: LabEquipmentTableProps) {
     const isStudent = userRole === 'student';
-    const isStaff = ['hod', 'pro_hod', 'oic_cen_labs', 'asst_oic_cen_labs', 'lab_engineer', 'lab_assistant'].includes(userRole);
+    const isStaff = !isStudent;
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -133,9 +134,9 @@ export function LabEquipmentTable({ inventory, labId, labCode, userRole }: LabEq
                                                 </svg>
                                                 Request
                                             </Link>
-                                        ) : isStaff ? (
+                                        ) : canEdit ? (
                                             <Link
-                                                href={`/inventory?edit=${item.id}`}
+                                                href={`/inventory/${item.id}/edit`}
                                                 className="text-emerald-600 hover:text-emerald-800 text-sm font-medium"
                                             >
                                                 Manage

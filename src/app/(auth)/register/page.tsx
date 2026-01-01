@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { registerStudent, RegistrationState } from '@/app/actions/register';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -31,7 +32,7 @@ function SubmitButton() {
 }
 
 export default function RegisterPage() {
-    const [state, formAction] = useFormState(registerStudent, initialState);
+    const [state, formAction] = useActionState(registerStudent, initialState);
     const [showPassword, setShowPassword] = useState(false);
 
     if (state.success) {

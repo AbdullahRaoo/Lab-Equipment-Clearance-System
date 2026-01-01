@@ -29,10 +29,21 @@ export async function createEquipmentRequest(formData: FormData) {
     const supervisorName = formData.get('supervisor_name') as string | null;
     const isGroupProject = formData.get('is_group_project') === 'true';
     const groupMembersRaw = formData.get('group_members') as string;
-    const itemIds = formData.getAll('item_ids') as string[];
+    const itemsRaw = formData.get('items') as string;
 
-    if (!labId || !purpose || !startTime || !endTime || itemIds.length === 0) {
+    if (!labId || !purpose || !startTime || !endTime || !itemsRaw) {
         return { error: 'Please fill all required fields and select at least one item' };
+    }
+
+    let items: { id: string, quantity: number }[] = [];
+    try {
+        items = JSON.parse(itemsRaw);
+    } catch {
+        return { error: 'Invalid items format' };
+    }
+
+    if (items.length === 0) {
+        return { error: 'Please select at least one item' };
     }
 
     let groupMembers = [];
@@ -69,9 +80,10 @@ export async function createEquipmentRequest(formData: FormData) {
     }
 
     // Add items to the request
-    const itemInserts = itemIds.map(itemId => ({
+    const itemInserts = items.map(item => ({
         request_id: request.id,
-        inventory_id: itemId
+        inventory_id: item.id,
+        quantity_requested: item.quantity
     }));
 
     const { error: itemsError } = await supabase

@@ -131,6 +131,7 @@ export interface InventoryItem {
   price?: number;
   supplier?: string;
   maintenance_interval_days?: number;
+  quantity?: number;
   image_url?: string;
   // Joins
   labs?: Lab;
@@ -184,7 +185,10 @@ export interface BorrowRequest {
   // Joins
   profiles?: Profile;
   labs?: Lab;
-  borrow_request_items?: { inventory: InventoryItem }[];
+  borrow_request_items?: {
+    inventory: InventoryItem;
+    quantity_requested?: number;
+  }[];
 
   // Approval profile joins (for display)
   stage1_approver?: Profile;

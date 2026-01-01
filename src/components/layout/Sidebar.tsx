@@ -26,7 +26,7 @@ export function Sidebar({ userRole }: SidebarProps) {
             roles: ['all'] as const
         },
         {
-            name: 'Browse Equipment',
+            name: 'Equipment Inventory', // Faculty see this name, students see labs from dashboard
             href: '/inventory',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

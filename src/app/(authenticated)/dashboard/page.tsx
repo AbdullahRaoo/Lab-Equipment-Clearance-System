@@ -5,6 +5,8 @@ import { StudentDashboard } from './components/StudentDashboard';
 import { LabAdminDashboard } from './components/LabAdminDashboard';
 import { SuperAdminDashboard } from './components/SuperAdminDashboard';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 

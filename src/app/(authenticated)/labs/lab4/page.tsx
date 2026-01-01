@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser } from '@/app/actions/auth';
 import { getLabInventory, getLabIssues } from '@/app/actions/lab';
 import { redirect } from 'next/navigation';
@@ -119,3 +121,4 @@ export default async function Lab4Page() {
     </div>
   );
 }
+

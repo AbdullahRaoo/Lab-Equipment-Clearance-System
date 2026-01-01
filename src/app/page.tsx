@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 
 import Link from 'next/link';
 import { getCurrentUser } from '@/app/actions/auth';
@@ -144,3 +146,4 @@ export default async function Home() {
     </div>
   );
 }
+

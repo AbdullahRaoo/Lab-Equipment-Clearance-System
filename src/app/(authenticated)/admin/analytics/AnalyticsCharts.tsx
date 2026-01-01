@@ -36,7 +36,7 @@ export default function AnalyticsCharts({ data }: { data: any }) {
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
-                                <Tooltip formatter={(value: number) => `PKR ${(value || 0).toLocaleString()}`} />
+                                <Tooltip formatter={(value: number | undefined) => `PKR ${(value || 0).toLocaleString()}`} />
                                 <Legend />
                                 <Bar dataKey="value" name="Value (PKR)" fill="#105a4b" />
                             </BarChart>
@@ -55,12 +55,12 @@ export default function AnalyticsCharts({ data }: { data: any }) {
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
-                                    label={({ name, percent }: { name: string, percent: number }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                                    label={(entry: any) => `${entry.name} ${((entry.percent || 0) * 100).toFixed(0)}%`}
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="count"
                                 >
-                                    {labData.map((entry: any, index: number) => (
+                                    {labData.map((_: any, index: number) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>

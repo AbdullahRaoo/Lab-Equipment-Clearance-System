@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 
 import { getCurrentUser } from '@/app/actions/auth';
 import { getMaintenanceOverview } from '@/app/actions/maintenance';
@@ -104,3 +106,4 @@ export default async function MaintenancePage() {
         </div>
     );
 }
+

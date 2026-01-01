@@ -11,7 +11,6 @@ export async function getInventory(labId?: string) {
       *,
       labs (name, code)
     `)
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
     if (labId) {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser } from '@/app/actions/auth';
 import { getLabPendingRequests } from '@/app/actions/borrow';
 import { redirect } from 'next/navigation';
@@ -121,3 +123,4 @@ export default async function AdminClearancePage() {
     </div>
   );
 }
+

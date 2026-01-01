@@ -103,11 +103,17 @@ export async function getCurrentUser() {
     }
 
     // Direct query to public.profiles with lab details
+    // Use explicit FK reference since profiles has two FKs to labs (assigned_lab_id, secondary_lab_id)
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
         *,
-        labs (
+        labs:assigned_lab_id (
+          id,
+          name,
+          code
+        ),
+        secondary_labs:secondary_lab_id (
           id,
           name,
           code

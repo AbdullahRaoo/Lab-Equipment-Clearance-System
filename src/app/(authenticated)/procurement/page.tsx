@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 
 import { getCurrentUser } from '@/app/actions/auth';
 import { getProcurementRequests } from '@/app/actions/procurement';
@@ -90,3 +92,4 @@ export default async function ProcurementPage() {
         </div>
     );
 }
+

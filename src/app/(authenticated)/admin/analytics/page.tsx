@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 
 import { getAnalyticsData } from '@/app/actions/analytics';
 import AnalyticsCharts from './AnalyticsCharts';
@@ -28,3 +30,4 @@ export default async function AnalyticsPage() {
         </div>
     );
 }
+

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser } from '@/app/actions/auth';
 import { getInventory, getLabs } from '@/app/actions/inventory';
 import { redirect } from 'next/navigation';
@@ -107,3 +109,4 @@ export default async function InventoryPage() {
         </div>
     );
 }
+

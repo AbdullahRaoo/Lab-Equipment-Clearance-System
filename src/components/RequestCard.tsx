@@ -150,8 +150,13 @@ export default function RequestCard({ request, userRole, showActions = true, onU
                     <p className="text-xs text-gray-500 mb-2">Requested Items ({items.length})</p>
                     <div className="flex flex-wrap gap-2">
                         {items.slice(0, 3).map((item: any, idx: number) => (
-                            <span key={idx} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                            <span key={idx} className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700 flex items-center gap-1">
                                 {item.inventory?.name || 'Item'}
+                                {item.quantity_requested && item.quantity_requested > 1 && (
+                                    <span className="bg-emerald-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold">
+                                        ×{item.quantity_requested}
+                                    </span>
+                                )}
                             </span>
                         ))}
                         {items.length > 3 && (

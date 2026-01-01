@@ -494,6 +494,30 @@ export async function getMyRequests() {
     return { data };
 }
 
+// Get all requests (for staff/admin dashboard)
+export async function getAllRequests() {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Unauthorized' };
+
+    const { data, error } = await supabase
+        .from('borrow_requests')
+        .select(`
+            *,
+            user:user_id(full_name, email, reg_no),
+            request_items(
+                *,
+                inventory:inventory_id(name, asset_tag, labs(name))
+            )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    if (error) return { error: error.message };
+    return { data };
+}
+
 // Helper function
 function canApproveAtStage(role: UserRole, stage: number): boolean {
     switch (stage) {

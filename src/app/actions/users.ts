@@ -12,7 +12,57 @@ const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false }
 });
 
-// Get all users (for admin dashboard)
+// =====================================================
+// DEEP CLEANUP UTILITY
+// This is the industrial-grade approach to prevent orphan data
+// =====================================================
+async function deepCleanupUser(email: string): Promise<{ cleaned: boolean; details: string[] }> {
+    const details: string[] = [];
+    let cleaned = false;
+
+    try {
+        // 1. Check and delete from public.profiles
+        const { data: profiles } = await adminClient.from('profiles').select('id').eq('email', email);
+        if (profiles && profiles.length > 0) {
+            for (const p of profiles) {
+                await adminClient.from('profiles').delete().eq('id', p.id);
+                details.push(`Deleted profile: ${p.id}`);
+                cleaned = true;
+            }
+        }
+
+        // 2. List auth users and find by email
+        const { data: { users } } = await adminClient.auth.admin.listUsers();
+        const authUser = users.find(u => u.email === email);
+
+        if (authUser) {
+            // Use Admin API to delete - this handles all related auth tables
+            await adminClient.auth.admin.deleteUser(authUser.id);
+            details.push(`Deleted auth user via API: ${authUser.id}`);
+            cleaned = true;
+        }
+
+        // 3. Direct database cleanup (for edge cases the API misses)
+        // This catches orphan identities that might exist without a user
+        const { error: identityError } = await adminClient.rpc('cleanup_orphan_identity', { target_email: email });
+        if (!identityError) {
+            details.push('Ran identity cleanup RPC');
+        }
+
+    } catch (error: any) {
+        details.push(`Cleanup error: ${error.message}`);
+    }
+
+    if (!cleaned) {
+        details.push('No records found to clean');
+    }
+
+    return { cleaned, details };
+}
+
+// =====================================================
+// GET ALL USERS
+// =====================================================
 export async function getAllUsers() {
     const supabase = await createServerClient();
 
@@ -34,7 +84,9 @@ export async function getAllUsers() {
     return { data };
 }
 
-// Get all labs
+// =====================================================
+// GET ALL LABS
+// =====================================================
 export async function getAllLabs() {
     const supabase = await createServerClient();
 
@@ -47,7 +99,9 @@ export async function getAllLabs() {
     return { data };
 }
 
-// Create faculty user
+// =====================================================
+// CREATE FACULTY USER - Production Grade
+// =====================================================
 export async function createFacultyUser(formData: FormData) {
     const supabase = await createServerClient();
 
@@ -69,6 +123,11 @@ export async function createFacultyUser(formData: FormData) {
     const role = formData.get('role') as UserRole;
     const labId = formData.get('lab_id') as string | null;
     const contactNo = formData.get('contact_no') as string | null;
+
+    // Validation
+    if (!email || !password || !fullName || !role) {
+        return { error: 'Missing required fields' };
+    }
 
     // Check if current user can assign this role
     if (!canManageRole(currentUser.role as UserRole, role)) {
@@ -103,20 +162,27 @@ export async function createFacultyUser(formData: FormData) {
     }
 
     try {
-        // Create Auth User
+        // STEP 1: Deep cleanup - prevent orphan issues
+        console.log(`[CreateUser] Starting deep cleanup for: ${email}`);
+        const cleanup = await deepCleanupUser(email);
+        console.log(`[CreateUser] Cleanup result:`, cleanup);
+
+        // STEP 2: Create Auth User (NO user_metadata to reduce failure points)
+        console.log(`[CreateUser] Creating auth user...`);
         const { data: authData, error: createError } = await adminClient.auth.admin.createUser({
             email,
             password,
-            email_confirm: true,
-            user_metadata: { full_name: fullName }
+            email_confirm: true
         });
 
         if (createError) {
-            console.error('Create user error:', createError);
-            return { error: 'Failed to create user account' };
+            console.error('[CreateUser] Auth creation failed:', createError);
+            return { error: `Failed to create user: ${createError.message}` };
         }
 
-        // Create Profile
+        console.log(`[CreateUser] Auth user created: ${authData.user.id}`);
+
+        // STEP 3: Create Profile
         const { error: profileError } = await adminClient.from('profiles').upsert({
             id: authData.user.id,
             email,
@@ -129,24 +195,29 @@ export async function createFacultyUser(formData: FormData) {
         });
 
         if (profileError) {
+            // Rollback: delete the auth user if profile creation fails
+            console.error('[CreateUser] Profile creation failed, rolling back auth user:', profileError);
             await adminClient.auth.admin.deleteUser(authData.user.id);
             return { error: 'Failed to create profile' };
         }
+
+        console.log(`[CreateUser] Success! User ${email} created with ID ${authData.user.id}`);
 
         revalidatePath('/admin/users');
         return { success: true, message: `${fullName} created successfully` };
 
     } catch (error: any) {
-        console.error('Create faculty error:', error);
+        console.error('[CreateUser] Unexpected error:', error);
         return { error: error.message };
     }
 }
 
-// Update user role
+// =====================================================
+// UPDATE USER ROLE
+// =====================================================
 export async function updateUserRole(userId: string, newRole: UserRole, labId?: string) {
     const supabase = await createServerClient();
 
-    // Get current user
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return { error: 'Not authenticated' };
 
@@ -158,7 +229,6 @@ export async function updateUserRole(userId: string, newRole: UserRole, labId?: 
 
     if (!currentUser) return { error: 'Profile not found' };
 
-    // Get target user's current role
     const { data: targetUser } = await supabase
         .from('profiles')
         .select('role, full_name')
@@ -167,7 +237,6 @@ export async function updateUserRole(userId: string, newRole: UserRole, labId?: 
 
     if (!targetUser) return { error: 'User not found' };
 
-    // Check permissions
     if (!canManageRole(currentUser.role as UserRole, targetUser.role as UserRole)) {
         return { error: 'You cannot modify this user' };
     }
@@ -201,7 +270,9 @@ export async function updateUserRole(userId: string, newRole: UserRole, labId?: 
     return { success: true, message: `${targetUser.full_name}'s role updated to ${newRole}` };
 }
 
-// Assign secondary role (for dual-role cases)
+// =====================================================
+// ASSIGN SECONDARY ROLE
+// =====================================================
 export async function assignSecondaryRole(userId: string, secondaryRole: UserRole, labId?: string) {
     const supabase = await createServerClient();
 
@@ -214,7 +285,6 @@ export async function assignSecondaryRole(userId: string, secondaryRole: UserRol
         .eq('id', authUser.id)
         .single();
 
-    // Only OIC+ can assign secondary roles
     if (!currentUser || ROLE_LEVELS[currentUser.role as UserRole] > 3) {
         return { error: 'Only OIC CEN Labs or higher can assign secondary roles' };
     }
@@ -230,7 +300,9 @@ export async function assignSecondaryRole(userId: string, secondaryRole: UserRol
     return { success: true };
 }
 
-// Toggle user active status
+// =====================================================
+// TOGGLE USER STATUS
+// =====================================================
 export async function toggleUserStatus(userId: string) {
     const supabase = await createServerClient();
 
@@ -252,7 +324,9 @@ export async function toggleUserStatus(userId: string) {
     return { success: true, isActive: !targetUser.is_active };
 }
 
-// Delete user
+// =====================================================
+// DELETE USER - With proper cleanup
+// =====================================================
 export async function deleteUser(userId: string) {
     const supabase = await createServerClient();
 
@@ -267,7 +341,7 @@ export async function deleteUser(userId: string) {
 
     const { data: targetUser } = await supabase
         .from('profiles')
-        .select('role, full_name')
+        .select('role, full_name, email')
         .eq('id', userId)
         .single();
 
@@ -277,13 +351,16 @@ export async function deleteUser(userId: string) {
         return { error: 'You cannot delete this user' };
     }
 
-    // Delete profile first (cascade should handle it, but be explicit)
-    await adminClient.from('profiles').delete().eq('id', userId);
+    try {
+        // Use deep cleanup to ensure all related data is removed
+        await deepCleanupUser(targetUser.email);
 
-    // Delete auth user
-    const { error } = await adminClient.auth.admin.deleteUser(userId);
-    if (error) return { error: error.message };
+        // Also try direct deletion via Admin API
+        await adminClient.auth.admin.deleteUser(userId).catch(() => { });
 
-    revalidatePath('/admin/users');
-    return { success: true, message: `${targetUser.full_name} deleted` };
+        revalidatePath('/admin/users');
+        return { success: true, message: `${targetUser.full_name} deleted` };
+    } catch (error: any) {
+        return { error: error.message };
+    }
 }

@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-
 import Link from 'next/link';
 import { getCurrentUser } from '@/app/actions/auth';
 import { redirect } from 'next/navigation';
@@ -16,134 +15,259 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <nav className="bg-white border-b border-gray-100">
+      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <NutechLogo className="h-8 w-auto text-[#105a4b]" />
-              </div>
+            <div className="flex items-center gap-3">
+              <NutechLogo className="h-10 w-auto text-[#105a4b]" />
+              <span className="font-bold text-xl text-gray-900 hidden sm:block">ECMS</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/login" className="text-gray-500 hover:text-gray-900 font-medium text-sm">
-                Staff Login
-              </Link>
-              <Link href="/login" className="bg-[#105a4b] hover:bg-[#0d473b] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
                 Sign In
+              </Link>
+              <Link href="/register" className="bg-[#105a4b] hover:bg-[#0d473b] text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-[#105a4b]/20 hover:shadow-xl">
+                Get Started
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-              <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl tracking-tight font-extrabold text-[#105a4b] sm:text-5xl md:text-6xl">
-                  <span className="block xl:inline">Next-Gen</span>{' '}
-                  <span className="block text-gray-900 xl:inline">Lab Management</span>
-                </h1>
-                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                  NUTECH Equipment Clearance & Management System (ECMS) streamlines borrowing, inventory tracking, and no-dues certification across all university laboratories.
-                </p>
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow">
-                    <Link
-                      href="/login"
-                      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#105a4b] hover:bg-[#0d473b] md:py-4 md:text-lg transition-colors"
-                    >
-                      Student Portal
-                    </Link>
-                  </div>
-                  <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <Link
-                      href="/signup"
-                      className="w-full flex items-center justify-center px-8 py-3 border border-[#105a4b] text-base font-medium rounded-md text-[#105a4b] bg-white hover:bg-gray-50 md:py-4 md:text-lg transition-colors"
-                    >
-                      New Registration
-                    </Link>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#105a4b]/5 via-white to-emerald-50/50"></div>
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#105a4b]/10 to-transparent"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium mb-6">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                NUTECH University Lab System
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
+                Smart<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#105a4b] to-emerald-600">
+                  Lab Equipment
+                </span><br />
+                Management
+              </h1>
+              <p className="mt-6 text-lg text-gray-600 max-w-lg">
+                Streamline equipment borrowing, track inventory in real-time, and manage clearance certificates across all university laboratories.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-[#105a4b] text-white rounded-xl font-semibold text-lg shadow-lg shadow-[#105a4b]/30 hover:bg-[#0d473b] hover:shadow-xl transition-all"
+                >
+                  Student Portal
+                  <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center px-8 py-4 border-2 border-[#105a4b] text-[#105a4b] rounded-xl font-semibold text-lg hover:bg-[#105a4b]/5 transition-all"
+                >
+                  Create Account
+                </Link>
+              </div>
+            </div>
+
+            {/* Hero Visual */}
+            <div className="hidden lg:block relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#105a4b]/20 to-emerald-200/30 rounded-3xl blur-3xl"></div>
+              <div className="relative bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-3 bg-gray-100 rounded-full w-3/4"></div>
+                  <div className="h-3 bg-[#105a4b]/20 rounded-full w-1/2"></div>
+                  <div className="h-12 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg mt-4"></div>
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <div className="h-16 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🖥️</span>
+                    </div>
+                    <div className="h-16 bg-purple-50 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <div className="h-16 bg-orange-50 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🤖</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </main>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Abstract Background / Image */}
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-gray-50 flex items-center justify-center">
-          {/* Using a pattern or placeholder if image is not desired, utilizing NUTECH branding */}
-          <div className="w-full h-full bg-[#105a4b]/5 pattern-grid-lg">
-            <svg className="h-full w-full text-[#105a4b]/10" fill="currentColor" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <polygon points="50,0 100,0 50,100 0,100" />
-            </svg>
+      {/* Stats Section */}
+      <section className="py-16 bg-[#105a4b]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <p className="text-4xl font-bold text-white">5</p>
+              <p className="text-emerald-200 mt-1">Specialized Labs</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-white">500+</p>
+              <p className="text-emerald-200 mt-1">Equipment Items</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-white">3-Stage</p>
+              <p className="text-emerald-200 mt-1">Approval Flow</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-white">24/7</p>
+              <p className="text-emerald-200 mt-1">Digital Access</p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">How It Works</h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Simple 4-step process from request to return
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {[
+              { step: '1', title: 'Submit Request', desc: 'Browse labs and select equipment you need', icon: '📝', color: 'bg-blue-500' },
+              { step: '2', title: 'Get Approved', desc: 'Lab staff and HOD review your request', icon: '✅', color: 'bg-purple-500' },
+              { step: '3', title: 'Collect Equipment', desc: 'Pick up approved items from the lab', icon: '📦', color: 'bg-orange-500' },
+              { step: '4', title: 'Return & Clear', desc: 'Return items and get clearance certificate', icon: '🎓', color: 'bg-green-500' },
+            ].map((item, idx) => (
+              <div key={idx} className="relative">
+                {idx < 3 && (
+                  <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-gray-200"></div>
+                )}
+                <div className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center hover:shadow-xl transition-shadow">
+                  <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg`}>
+                    {item.icon}
+                  </div>
+                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-[#105a4b] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {item.step}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                  <p className="mt-2 text-gray-500 text-sm">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Labs Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">University Laboratories</h2>
+            <p className="mt-4 text-lg text-gray-600">Access equipment across 5 specialized labs</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {[
+              { name: 'Computer & Network', code: 'CNET', icon: '🖥️', color: 'from-blue-500 to-blue-600' },
+              { name: 'DLD Lab', code: 'DLD', icon: '⚡', color: 'from-purple-500 to-purple-600' },
+              { name: 'Embedded Design', code: 'EMB', icon: '🔧', color: 'from-emerald-500 to-emerald-600' },
+              { name: 'IoT Lab', code: 'IOT', icon: '📡', color: 'from-orange-500 to-orange-600' },
+              { name: 'Robotics Lab', code: 'ROBO', icon: '🤖', color: 'from-pink-500 to-pink-600' },
+            ].map((lab, idx) => (
+              <div key={idx} className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${lab.color} flex items-center justify-center text-2xl shadow-lg mb-4`}>
+                  {lab.icon}
+                </div>
+                <h3 className="font-semibold text-gray-900 group-hover:text-[#105a4b] transition-colors">{lab.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">{lab.code}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Features Grid */}
-      <div className="py-12 bg-white">
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Integrated Workflow
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-              Efficiently manage lab resources with role-based access control.
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Powerful Features</h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Everything you need for efficient lab resource management
             </p>
           </div>
 
-          <div className="mt-10">
-            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Feature 1 */}
-              <div className="flex flex-col items-center">
-                <span className="p-4 rounded-full bg-green-100 text-[#105a4b] mb-4">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                </span>
-                <h3 className="text-lg font-medium text-gray-900">Digital Requests</h3>
-                <p className="mt-2 text-base text-gray-500 text-center">Paperless equipment borrowing and no-dues clearance.</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: 'Digital Requests', desc: 'Paperless equipment borrowing with real-time status tracking', icon: '📋' },
+              { title: 'Multi-Stage Approval', desc: 'Streamlined Lab → OIC → HOD approval workflow', icon: '✔️' },
+              { title: 'Inventory Tracking', desc: 'Real-time visibility of equipment across all labs', icon: '📊' },
+              { title: 'Clearance Certificates', desc: 'Automated no-dues verification for graduating students', icon: '🎓' },
+              { title: 'Role-Based Access', desc: '7 user levels from Student to HOD with specific permissions', icon: '🔐' },
+              { title: 'Late Fine Management', desc: 'Automated tracking of overdue returns with fine calculation', icon: '💰' },
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
+                <p className="mt-2 text-gray-500">{feature.desc}</p>
               </div>
-
-              {/* Feature 2 */}
-              <div className="flex flex-col items-center">
-                <span className="p-4 rounded-full bg-green-100 text-[#105a4b] mb-4">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                </span>
-                <h3 className="text-lg font-medium text-gray-900">Inventory Tracking</h3>
-                <p className="mt-2 text-base text-gray-500 text-center">Real-time asset visibility for 5 specialized labs.</p>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="flex flex-col items-center">
-                <span className="p-4 rounded-full bg-green-100 text-[#105a4b] mb-4">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </span>
-                <h3 className="text-lg font-medium text-gray-900">Automated Approvals</h3>
-                <p className="mt-2 text-base text-gray-500 text-center">Streamlined verification workflow for students and faculty.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200">
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
-            <div className="flex justify-center space-x-6 md:order-2">
-              <p className="text-center text-base text-gray-400">
-                NUTECH University Islamabad
-              </p>
+      {/* CTA Section */}
+      <section className="py-20 bg-[#105a4b]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Get Started?
+          </h2>
+          <p className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto">
+            Join hundreds of students and faculty members using ECMS for seamless lab equipment management.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#105a4b] rounded-xl font-semibold text-lg shadow-lg hover:bg-gray-50 transition-all"
+            >
+              Create Your Account
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-xl font-semibold text-lg hover:bg-white/10 transition-all"
+            >
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center gap-3 mb-4 md:mb-0">
+              <NutechLogo className="h-8 w-auto text-white" />
+              <span className="font-bold text-white">ECMS</span>
             </div>
-            <div className="mt-8 md:mt-0 md:order-1">
-              <p className="text-center text-base text-gray-400">
-                &copy; 2024 Lab Management System. All rights reserved.
-              </p>
+            <div className="flex gap-6 text-sm">
+              <Link href="/login" className="hover:text-white transition-colors">Login</Link>
+              <Link href="/register" className="hover:text-white transition-colors">Register</Link>
             </div>
           </div>
-        </footer>
-      </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+            <p>&copy; 2026 NUTECH University Islamabad. Equipment Clearance Management System.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
-

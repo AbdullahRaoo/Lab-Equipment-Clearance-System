@@ -58,17 +58,29 @@ export default async function RequestsPage() {
                     <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
                     <p className="text-gray-500 mt-1">{pageDescription}</p>
                 </div>
-                {role === 'student' && (
-                    <Link
-                        href="/clearance"
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 shadow-lg"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        New Request
-                    </Link>
-                )}
+                <div className="flex items-center gap-3">
+                    {role === 'student' ? (
+                        <Link
+                            href="/clearance"
+                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 shadow-lg"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            New Request
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/requests/all"
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 shadow-sm"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            View All Requests
+                        </Link>
+                    )}
+                </div>
             </div>
 
             {/* Stats for Admin/Staff */}

@@ -112,7 +112,7 @@ export function Sidebar({ userRole }: SidebarProps) {
     }, [] as typeof filteredItems);
 
     return (
-        <aside className="w-64 bg-gradient-to-b from-[#105a4b] to-[#0d473b] text-white h-screen flex flex-col shadow-xl sticky top-0">
+        <aside className="w-64 bg-gradient-to-b from-[#7d2628] to-[#5c1d1f] text-white h-screen flex flex-col shadow-xl sticky top-0">
             <div className="p-6 border-b border-white/10">
                 <Link href="/dashboard">
                     <NutechLogo variant="light" />
@@ -131,10 +131,10 @@ export function Sidebar({ userRole }: SidebarProps) {
                                 : 'text-white/70 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
-                            <span className={active ? 'text-emerald-300' : ''}>{item.icon}</span>
+                            <span className={active ? 'text-[#ba8d36]' : ''}>{item.icon}</span>
                             <span>{item.name}</span>
                             {active && (
-                                <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400" />
+                                <span className="ml-auto w-2 h-2 rounded-full bg-[#ba8d36]" />
                             )}
                         </Link>
                     );
@@ -144,7 +144,7 @@ export function Sidebar({ userRole }: SidebarProps) {
             <div className="p-4 border-t border-white/10">
                 <div className="px-4 py-3 bg-white/5 rounded-lg">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-sm font-bold shadow-lg">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ba8d36] to-[#9a7528] flex items-center justify-center text-sm font-bold shadow-lg">
                             {userRole.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -161,3 +161,4 @@ export function Sidebar({ userRole }: SidebarProps) {
         </aside>
     );
 }
+

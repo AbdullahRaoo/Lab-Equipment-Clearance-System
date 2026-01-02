@@ -105,7 +105,7 @@ export default function AddInventoryPage() {
                         type="text"
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#105a4b] focus:ring-[#105a4b]"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7d2628] focus:ring-[#7d2628]"
                         placeholder="e.g. Oscilloscope Tektronix"
                         required
                     />
@@ -184,7 +184,7 @@ export default function AddInventoryPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-[#105a4b] text-white py-2 px-4 rounded hover:bg-[#0d473b] transition-colors disabled:opacity-50 font-medium"
+                        className="w-full bg-[#7d2628] text-white py-2 px-4 rounded hover:bg-[#5c1d1f] transition-colors disabled:opacity-50 font-medium"
                     >
                         {loading ? 'Adding...' : 'Add Equipment'}
                     </button>

@@ -4,21 +4,31 @@
   --background: #ffffff;
   --foreground: #111827;
 
-  /* NUTECH Color Scheme */
-  --color-primary: #105a4b;
-  --color-primary-hover: #0d473b;
-  --color-primary-light: #e6f5f3;
-  --color-brand-secondary: #333333;
+  /* NUTECH Brand Colors - Maroon Theme */
+  --color-primary: #7d2628;
+  --color-primary-hover: #5c1d1f;
+  --color-primary-light: #f9e8e8;
+  --color-primary-dark: #4a1617;
 
+  /* Secondary Colors */
+  --color-gold: #ba8d36;
+  --color-green: #2da552;
+  --color-gray: #5d5f5e;
+  --color-blue: #4e6bb2;
+
+  /* Text Colors */
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
 
+  /* Background Colors */
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #f9fafb;
+  --color-bg-accent: #fdf6e9;
 
+  /* Border Colors */
   --color-border: #d1d5db;
-  --color-border-focus: #2563eb;
+  --color-border-focus: #7d2628;
 }
 
 @theme inline {
@@ -76,4 +86,18 @@ select option {
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Custom brand gradient */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #7d2628 0%, #a33335 100%);
+}
+
+/* Gold accent */
+.text-brand-gold {
+  color: #ba8d36;
+}
+
+.bg-brand-gold {
+  background-color: #ba8d36;
 }

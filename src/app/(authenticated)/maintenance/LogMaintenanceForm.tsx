@@ -41,7 +41,7 @@ export function LogMaintenanceForm({ labId }: { labId?: string }) {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-[#105a4b] text-white px-4 py-2 rounded-md font-medium hover:bg-[#0d473b] transition-colors"
+                className="bg-[#7d2628] text-white px-4 py-2 rounded-md font-medium hover:bg-[#5c1d1f] transition-colors"
             >
                 + Log Maintenance
             </button>
@@ -131,12 +131,12 @@ export function LogMaintenanceForm({ labId }: { labId?: string }) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 text-[#105a4b] font-bold">Next Due Date</label>
+                    <label className="block text-sm font-medium text-gray-700 text-[#7d2628] font-bold">Next Due Date</label>
                     <input
                         type="date"
                         value={formData.next_due_date}
                         onChange={e => setFormData({ ...formData, next_due_date: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-[#105a4b]"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm ring-1 ring-[#7d2628]"
                         required
                     />
                     <p className="text-xs text-gray-500 mt-1">This will update the predictive maintenance schedule.</p>
@@ -145,7 +145,7 @@ export function LogMaintenanceForm({ labId }: { labId?: string }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#105a4b] text-white py-2 rounded-md hover:bg-[#0d473b]"
+                    className="w-full bg-[#7d2628] text-white py-2 rounded-md hover:bg-[#5c1d1f]"
                 >
                     {loading ? 'Saving...' : 'Save Log'}
                 </button>

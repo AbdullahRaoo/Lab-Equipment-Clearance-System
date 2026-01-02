@@ -5,7 +5,7 @@ import {
     PieChart, Pie, Cell
 } from 'recharts';
 
-const COLORS = ['#105a4b', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ['#7d2628', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export default function AnalyticsCharts({ data }: { data: any }) {
     const { labData, statusData, totalItems, totalValue } = data;
@@ -38,7 +38,7 @@ export default function AnalyticsCharts({ data }: { data: any }) {
                                 <YAxis />
                                 <Tooltip formatter={(value: number | undefined) => `PKR ${(value || 0).toLocaleString()}`} />
                                 <Legend />
-                                <Bar dataKey="value" name="Value (PKR)" fill="#105a4b" />
+                                <Bar dataKey="value" name="Value (PKR)" fill="#7d2628" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

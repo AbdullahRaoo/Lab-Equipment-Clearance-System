@@ -40,7 +40,7 @@ export function ProfileForm({ user }: { user: any }) {
                         name="full_name"
                         defaultValue={user.full_name}
                         required
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#105a4b] focus:border-[#105a4b] sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#7d2628] focus:border-[#7d2628] sm:text-sm"
                     />
                 </div>
 
@@ -59,7 +59,7 @@ export function ProfileForm({ user }: { user: any }) {
                     <select
                         name="department"
                         defaultValue={user.department}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#105a4b] focus:border-[#105a4b] sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#7d2628] focus:border-[#7d2628] sm:text-sm"
                     >
                         <option value="">Select Department</option>
                         <option value="Computer Science">Computer Science</option>
@@ -77,7 +77,7 @@ export function ProfileForm({ user }: { user: any }) {
                             type="text"
                             name="reg_no"
                             defaultValue={user.reg_no}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#105a4b] focus:border-[#105a4b] sm:text-sm"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#7d2628] focus:border-[#7d2628] sm:text-sm"
                         />
                     </div>
                 )}
@@ -89,7 +89,7 @@ export function ProfileForm({ user }: { user: any }) {
                         name="contact_no"
                         defaultValue={user.contact_no}
                         placeholder="0300-1234567"
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#105a4b] focus:border-[#105a4b] sm:text-sm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#7d2628] focus:border-[#7d2628] sm:text-sm"
                     />
                 </div>
             </div>
@@ -98,7 +98,7 @@ export function ProfileForm({ user }: { user: any }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#105a4b] py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#0d473b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#105a4b] disabled:opacity-50"
+                    className="bg-[#7d2628] py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#5c1d1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7d2628] disabled:opacity-50"
                 >
                     {loading ? 'Saving...' : 'Save Changes'}
                 </button>

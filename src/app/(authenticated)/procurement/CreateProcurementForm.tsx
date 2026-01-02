@@ -28,7 +28,7 @@ export function CreateProcurementForm() {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-[#105a4b] text-white px-4 py-2 rounded-md font-medium hover:bg-[#0d473b] transition-colors"
+                className="bg-[#7d2628] text-white px-4 py-2 rounded-md font-medium hover:bg-[#5c1d1f] transition-colors"
             >
                 + New Purchase Request
             </button>
@@ -104,7 +104,7 @@ export function CreateProcurementForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#105a4b] text-white py-2 rounded-md hover:bg-[#0d473b]"
+                    className="w-full bg-[#7d2628] text-white py-2 rounded-md hover:bg-[#5c1d1f]"
                 >
                     {loading ? 'Submitting...' : 'Submit to HOD'}
                 </button>

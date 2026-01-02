@@ -173,6 +173,53 @@ export async function getPendingRequestsForApproval() {
     return { data };
 }
 
+// Get requests awaiting handover or return (for lab staff)
+export async function getRequestsForHandover() {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, role, assigned_lab_id')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile) return { error: 'Profile not found' };
+
+    const role = profile.role as UserRole;
+
+    // Only lab staff can handle handover/return
+    if (!['lab_engineer', 'lab_assistant'].includes(role)) {
+        return { data: [] };
+    }
+
+    let query = supabase
+        .from('borrow_requests')
+        .select(`
+            *,
+            profiles:user_id (id, full_name, email, reg_no),
+            labs:lab_id (id, name, code),
+            borrow_request_items (
+                quantity_requested,
+                inventory:inventory_id (id, name, model, asset_tag)
+            )
+        `)
+        .in('status', ['approved', 'handed_over'])
+        .order('created_at', { ascending: false });
+
+    // Filter by assigned lab
+    if (profile.assigned_lab_id) {
+        query = query.eq('lab_id', profile.assigned_lab_id);
+    }
+
+    const { data, error } = await query;
+    if (error) return { error: error.message };
+
+    return { data };
+}
+
 // Approve request at current stage
 export async function approveRequest(requestId: string, notes?: string) {
     const supabase = await createClient();
@@ -481,12 +528,14 @@ export async function getMyRequests() {
     const { data, error } = await supabase
         .from('borrow_requests')
         .select(`
-      *,
-      labs:lab_id (id, name, code),
-      borrow_request_items (
-        inventory:inventory_id (id, name, model, asset_tag)
-      )
-    `)
+            *,
+            profiles:user_id (id, full_name, email, reg_no),
+            labs:lab_id (id, name, code),
+            borrow_request_items (
+                quantity_requested,
+                inventory:inventory_id (id, name, model, asset_tag)
+            )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -505,10 +554,11 @@ export async function getAllRequests() {
         .from('borrow_requests')
         .select(`
             *,
-            user:user_id(full_name, email, reg_no),
-            request_items(
-                *,
-                inventory:inventory_id(name, asset_tag, labs(name))
+            profiles:user_id (id, full_name, email, reg_no),
+            labs:lab_id (id, name, code),
+            borrow_request_items (
+                quantity_requested,
+                inventory:inventory_id (id, name, model, asset_tag)
             )
         `)
         .order('created_at', { ascending: false })

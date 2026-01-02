@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/actions/auth';
-import { getPendingRequestsForApproval, getMyRequests } from '@/app/actions/equipment-request';
+import { getPendingRequestsForApproval, getMyRequests, getRequestsForHandover } from '@/app/actions/equipment-request';
 import { UserRole, STATUS_LABELS, ROLE_LABELS, isAdminRole } from '@/types/clearance';
 import RequestCard from '@/components/RequestCard';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default async function RequestsPage() {
 
     // Get appropriate requests based on role
     let requests: any[] = [];
+    let handoverRequests: any[] = [];
     let pageTitle = 'Equipment Requests';
     let pageDescription = '';
 
@@ -33,11 +34,21 @@ export default async function RequestsPage() {
         requests = result.data || [];
         pageTitle = 'Pending Approvals';
         pageDescription = `Requests awaiting your review as ${ROLE_LABELS[role]}`;
+
+        // For lab staff, also get handover/return requests
+        if (isLabStaff) {
+            const handoverResult = await getRequestsForHandover();
+            handoverRequests = handoverResult.data || [];
+        }
     }
 
     // Group requests by status for better organization
     const pendingRequests = requests.filter(r => !['returned', 'rejected'].includes(r.status));
     const completedRequests = requests.filter(r => ['returned', 'rejected'].includes(r.status));
+
+    // Split handover requests
+    const awaitingPickup = handoverRequests.filter(r => r.status === 'approved');
+    const awaitingReturn = handoverRequests.filter(r => r.status === 'handed_over');
 
     return (
         <div className="p-8">
@@ -77,13 +88,13 @@ export default async function RequestsPage() {
                     />
                     <StatCard
                         label="Approved"
-                        value={requests.filter(r => r.status === 'approved').length}
+                        value={awaitingPickup.length}
                         color="green"
                         icon="check"
                     />
                     <StatCard
-                        label="Handed Over"
-                        value={requests.filter(r => r.status === 'handed_over').length}
+                        label="With Students"
+                        value={awaitingReturn.length}
                         color="purple"
                         icon="truck"
                     />
@@ -94,7 +105,7 @@ export default async function RequestsPage() {
             {pendingRequests.length > 0 ? (
                 <div className="space-y-4">
                     <h2 className="font-semibold text-gray-700">
-                        {role === 'student' ? 'Active Requests' : 'Awaiting Your Action'}
+                        {role === 'student' ? 'Active Requests' : 'Awaiting Your Approval'}
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                         {pendingRequests.map(request => (
@@ -128,6 +139,47 @@ export default async function RequestsPage() {
                             Request Equipment
                         </Link>
                     )}
+                </div>
+            )}
+
+            {/* Handover Management - Lab Staff Only */}
+            {isLabStaff && awaitingPickup.length > 0 && (
+                <div className="mt-8 space-y-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <h2 className="font-semibold text-gray-700">Ready for Pickup ({awaitingPickup.length})</h2>
+                    </div>
+                    <p className="text-sm text-gray-500">These requests are approved and waiting for the student to collect equipment</p>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        {awaitingPickup.map(request => (
+                            <RequestCard
+                                key={request.id}
+                                request={request}
+                                userRole={role}
+                                showActions={true}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {isLabStaff && awaitingReturn.length > 0 && (
+                <div className="mt-8 space-y-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                        <h2 className="font-semibold text-gray-700">Awaiting Return ({awaitingReturn.length})</h2>
+                    </div>
+                    <p className="text-sm text-gray-500">Equipment currently with students - mark as returned when received back</p>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        {awaitingReturn.map(request => (
+                            <RequestCard
+                                key={request.id}
+                                request={request}
+                                userRole={role}
+                                showActions={true}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
 

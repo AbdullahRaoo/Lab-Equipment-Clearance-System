@@ -145,6 +145,42 @@ export default function RequestCard({ request, userRole, showActions = true, onU
                     <p className="text-sm text-gray-700">{request.purpose}</p>
                 </div>
 
+                {/* Supervisor (for FYP/Group projects) */}
+                {request.supervisor_name && (
+                    <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg border border-purple-100">
+                        <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <div>
+                            <p className="text-xs text-purple-500">Supervisor</p>
+                            <p className="text-sm font-medium text-purple-700">{request.supervisor_name}</p>
+                        </div>
+                        {request.is_group_project && (
+                            <span className="ml-auto px-2 py-0.5 bg-purple-200 text-purple-700 rounded text-xs font-medium">
+                                Group Project
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {/* Late Fine Warning */}
+                {request.status === 'handed_over' && new Date(request.end_time) < new Date() && (
+                    <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                        <div className="flex items-center gap-2 text-red-700">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p className="font-medium">Overdue Return!</p>
+                                <p className="text-xs">
+                                    {Math.ceil((new Date().getTime() - new Date(request.end_time).getTime()) / (1000 * 60 * 60 * 24))} days late •
+                                    Fine: Rs. {Math.ceil((new Date().getTime() - new Date(request.end_time).getTime()) / (1000 * 60 * 60 * 24)) * 100}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Items */}
                 <div>
                     <p className="text-xs text-gray-500 mb-2">Requested Items ({items.length})</p>

@@ -19,6 +19,16 @@ interface TimelineStep {
 }
 
 export default function ApprovalTimeline({ request }: ApprovalTimelineProps) {
+    // Define isRejected and helper BEFORE using them
+    const isRejected = request.status === 'rejected';
+
+    function getStepStatus(req: BorrowRequest, stage: number): 'completed' | 'current' | 'pending' | 'rejected' {
+        if (isRejected && req.rejection_stage === stage) return 'rejected';
+        if (req.current_stage > stage) return 'completed';
+        if (req.current_stage === stage) return 'current';
+        return 'pending';
+    }
+
     const steps: TimelineStep[] = [
         {
             stage: 0,
@@ -56,29 +66,26 @@ export default function ApprovalTimeline({ request }: ApprovalTimelineProps) {
         },
         {
             stage: 4,
-            label: 'Ready for Pickup',
-            description: 'Collect equipment from lab',
+            label: 'Equipment Pickup',
+            description: isRejected ? 'Request was rejected' :
+                request.status === 'approved' ? 'Ready to collect from lab' :
+                    request.status === 'handed_over' ? 'Equipment handed to student' :
+                        request.status === 'returned' ? 'Completed' : 'Awaiting approval',
             status: request.status === 'approved' ? 'current' :
-                request.status === 'handed_over' || request.status === 'returned' ? 'completed' : 'pending'
+                request.status === 'handed_over' || request.status === 'returned' ? 'completed' :
+                    isRejected ? 'pending' : 'pending',
+            timestamp: request.handed_over_at
         },
         {
             stage: 5,
-            label: 'Returned',
-            description: 'Equipment returned to lab',
+            label: 'Equipment Return',
+            description: request.status === 'returned' ? 'Equipment returned successfully' :
+                request.status === 'handed_over' ? 'Awaiting equipment return' : 'Pending',
             status: request.status === 'returned' ? 'completed' :
-                request.status === 'handed_over' ? 'current' : 'pending'
+                request.status === 'handed_over' ? 'current' : 'pending',
+            timestamp: request.returned_at
         }
     ];
-
-    // Find rejection point if rejected
-    const isRejected = request.status === 'rejected';
-
-    function getStepStatus(req: BorrowRequest, stage: number): 'completed' | 'current' | 'pending' | 'rejected' {
-        if (isRejected && req.rejection_stage === stage) return 'rejected';
-        if (req.current_stage > stage) return 'completed';
-        if (req.current_stage === stage) return 'current';
-        return 'pending';
-    }
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -92,7 +99,7 @@ export default function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                             <div className="absolute left-[18px] top-10 w-0.5 h-[calc(100%-20px)] bg-gray-200">
                                 <div
                                     className={`w-full transition-all duration-500 ${step.status === 'completed' ? 'bg-emerald-500 h-full' :
-                                            step.status === 'rejected' ? 'bg-red-500 h-1/2' : 'h-0'
+                                        step.status === 'rejected' ? 'bg-red-500 h-1/2' : 'h-0'
                                         }`}
                                 />
                             </div>
@@ -100,9 +107,9 @@ export default function ApprovalTimeline({ request }: ApprovalTimelineProps) {
 
                         {/* Status Icon */}
                         <div className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${step.status === 'completed' ? 'bg-emerald-500 text-white' :
-                                step.status === 'current' ? 'bg-blue-500 text-white ring-4 ring-blue-100 animate-pulse' :
-                                    step.status === 'rejected' ? 'bg-red-500 text-white' :
-                                        'bg-gray-200 text-gray-400'
+                            step.status === 'current' ? 'bg-blue-500 text-white ring-4 ring-blue-100 animate-pulse' :
+                                step.status === 'rejected' ? 'bg-red-500 text-white' :
+                                    'bg-gray-200 text-gray-400'
                             }`}>
                             {step.status === 'completed' ? (
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,9 +132,9 @@ export default function ApprovalTimeline({ request }: ApprovalTimelineProps) {
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                                 <h4 className={`font-medium ${step.status === 'completed' ? 'text-emerald-700' :
-                                        step.status === 'current' ? 'text-blue-700' :
-                                            step.status === 'rejected' ? 'text-red-700' :
-                                                'text-gray-500'
+                                    step.status === 'current' ? 'text-blue-700' :
+                                        step.status === 'rejected' ? 'text-red-700' :
+                                            'text-gray-500'
                                     }`}>
                                     {step.label}
                                 </h4>
